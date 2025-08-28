@@ -1,0 +1,2952 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Seguimiento de Operaciones</title>
+    <style>
+        /* ESTILOS EXISTENTES DE LA TABLA DE OPERACIONES */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f7fafc;
+            --bg-tertiary: #e2e8f0;
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --text-muted: #718096;
+            --border-color: #cbd5e0;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --header-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success: #48bb78;
+            --danger: #f56565;
+            --warning: #ed8936;
+            --info: #4299e1;
+            --card-hover: #f7fafc;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a202c;
+            --bg-secondary: #2d3748;
+            --bg-tertiary: #4a5568;
+            --text-primary: #f7fafc;
+            --text-secondary: #e2e8f0;
+            --text-muted: #a0aec0;
+            --border-color: #4a5568;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --header-bg: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            --card-hover: #2d3748;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            color: var(--text-primary);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section {
+            display: none;
+            background: var(--bg-primary);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            margin-bottom: 20px;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .header {
+            background: var(--header-bg);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header h1::before {
+            content: "📊";
+            font-size: 1.5rem;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .controls {
+            padding: 25px 30px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            background: var(--bg-secondary);
+        }
+
+        .date-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-primary);
+            padding: 12px 16px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .date-selector label {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        input[type="date"] {
+            padding: 10px 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        input[type="date"]:focus {
+            outline: none;
+            border-color: var(--info);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, var(--success) 0%, #38a169 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.3);
+        }
+
+        .divider {
+            width: 2px;
+            height: 30px;
+            background: var(--border-color);
+        }
+
+        .wally-btn {
+            background: linear-gradient(135deg, #9f7aea 0%, #667eea 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .wally-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(159, 122, 234, 0.3);
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, var(--text-muted) 0%, var(--text-secondary) 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        #historySelector {
+            padding: 10px 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+            min-width: 200px;
+        }
+
+        #historySelector:focus {
+            outline: none;
+            border-color: var(--info);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+
+        .summary {
+            background: var(--bg-secondary);
+            padding: 25px 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .summary-item {
+            background: var(--bg-primary);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .summary-item:hover {
+            transform: translateY(-4px);
+        }
+
+        .summary-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .summary-value.profit {
+            color: var(--success);
+        }
+
+        .table-header {
+            background: var(--bg-secondary);
+            padding: 20px 30px;
+            border-bottom: 2px solid var(--border-color);
+            text-align: center;
+        }
+
+        .table-header h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+            background: var(--bg-primary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            padding: 16px 12px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        tr:hover {
+            background-color: var(--card-hover);
+        }
+
+        .compra {
+            background: linear-gradient(90deg, rgba(72, 187, 120, 0.1) 0%, rgba(72, 187, 120, 0.05) 100%) !important;
+            border-left: 4px solid var(--success);
+        }
+
+        .venta {
+            background: linear-gradient(90deg, rgba(245, 101, 101, 0.1) 0%, rgba(245, 101, 101, 0.05) 100%) !important;
+            border-left: 4px solid var(--danger);
+        }
+
+        .status-completado {
+            background: var(--success);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-en-curso {
+            background: var(--warning);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-en-disputa {
+            background: var(--danger);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 12px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--info);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 6px 12px;
+            margin: 2px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .edit-btn {
+            background: var(--info);
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #3182ce;
+            transform: translateY(-1px);
+        }
+
+        .delete-btn {
+            background: var(--danger);
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #e53e3e;
+            transform: translateY(-1px);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-primary);
+            padding: 0;
+            border-radius: 20px;
+            width: 95%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            background: var(--header-bg);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .form-sections {
+            display: grid;
+            gap: 30px;
+        }
+
+        .form-section {
+            background: var(--bg-secondary);
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 4px solid var(--info);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .form-group input, .form-group select {
+            padding: 14px 16px;
+            font-size: 15px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            transform: translateY(-2px);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            padding: 20px 30px 30px;
+            background: var(--bg-secondary);
+            border-radius: 0 0 20px 20px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--info) 0%, #3182ce 100%);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(66, 153, 225, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-green {
+            background: linear-gradient(135deg, var(--success) 0%, #38a169 100%);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-green:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+            transform: translateY(-2px);
+        }
+
+        .calculated {
+            background: linear-gradient(135deg, rgba(72, 187, 120, 0.1) 0%, rgba(72, 187, 120, 0.05) 100%) !important;
+            border-color: var(--success) !important;
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .disabled-field {
+            background: var(--bg-tertiary) !important;
+            color: var(--text-muted) !important;
+            cursor: not-allowed;
+        }
+
+        /* Wally Tech Section Specific Styles */
+        .wally-header h1::before {
+            content: "💱";
+        }
+
+        .wally-table {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 30px;
+        }
+
+        .wally-column {
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .wally-column.compra {
+            border-top: 4px solid var(--success);
+        }
+
+        .wally-column.venta {
+            border-top: 4px solid var(--danger);
+        }
+
+        .wally-column h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .wally-column.compra h3 {
+            background: var(--success);
+        }
+
+        .wally-column.venta h3 {
+            background: var(--danger);
+        }
+
+        .wally-table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .wally-table-container table {
+            min-width: 100%;
+        }
+
+        .wally-summary {
+            grid-column: span 2;
+            background: linear-gradient(135deg, #9f7aea 0%, #667eea 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .wally-summary h3 {
+            margin-bottom: 15px;
+        }
+
+        .wally-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .wally-summary-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .app-container {
+                margin: 10px;
+            }
+            
+            .section {
+                border-radius: 12px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .summary {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 15px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                width: 98%;
+                margin: 10px;
+            }
+
+            .wally-table {
+                grid-template-columns: 1fr;
+            }
+
+            .wally-summary {
+                grid-column: span 1;
+            }
+        }
+
+        /* Solo la sección de LOTE tendrá scroll vertical */
+        .lote-scroll {
+            max-height: 80px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            white-space: normal;
+            word-break: break-word;
+            padding: 2px 4px;
+        }
+
+        /* Evita que la fila "estire" el contenido hacia el centro */
+        #tablaOperaciones td {
+            vertical-align: top;
+        }
+
+        .toggle-info-btn {
+            background: linear-gradient(135deg, var(--info) 0%, #3182ce 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .toggle-info-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(66, 153, 225, 0.3);
+            background: linear-gradient(135deg, #4299e1 0%, #2b6cb0 100%);
+        }
+
+        .toggle-info-btn span {
+            transition: transform 0.3s ease;
+        }
+
+        /* Estilo para que el input se vea como los otros valores */
+        .wally-input {
+            font-size: 20px;
+            font-weight: 700;
+            text-align: center;
+            border: none;
+            background: transparent;
+            color: var(--text-primary);
+            width: 100px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        /* Cuando está editable */
+        .wally-input:not([readonly]) {
+            border-bottom: 2px solid var(--info);
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            padding: 2px 4px;
+        }
+
+        /* Botón de editar */
+        .edit-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            opacity: 0.6;
+            transition: opacity 0.3s ease;
+        }
+
+        .edit-icon:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        /* ==== ESTILOS DEL CENTRO DE OPERACIONES IA ==== */
+        #aiOperationsCenter {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        #aiToggleBtn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #aiToggleBtn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+        }
+
+        #aiToggleBtn.has-alerts {
+            animation: pulse-alert 2s infinite;
+        }
+
+        #aiToggleBtn.critical {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            animation: pulse-critical 1s infinite;
+        }
+
+        #aiNotificationBadge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #f56565;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+        }
+
+        @keyframes pulse-alert {
+            0% { box-shadow: 0 0 0 0 rgba(237, 137, 54, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(237, 137, 54, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(237, 137, 54, 0); }
+        }
+
+        @keyframes pulse-critical {
+            0% { box-shadow: 0 0 0 0 rgba(245, 101, 101, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(245, 101, 101, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(245, 101, 101, 0); }
+        }
+
+        /* Panel de Notificaciones */
+        #aiPanel {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            width: 380px;
+            max-height: 500px;
+            background: var(--bg-primary);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        #aiHeader {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #aiHeader h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        #aiStatus {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 15px 20px;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: blink 2s infinite;
+        }
+
+        .status-indicator.warning { background: var(--warning); }
+        .status-indicator.critical { background: var(--danger); }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        #aiNotifications {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 300px;
+            padding: 10px;
+        }
+
+        .notification {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+            transition: all 0.3s ease;
+        }
+
+        .notification:hover {
+            transform: translateX(-5px);
+            box-shadow: var(--shadow);
+        }
+
+        .notification.info { border-left: 4px solid var(--info); }
+        .notification.success { border-left: 4px solid var(--success); }
+        .notification.warning { border-left: 4px solid var(--warning); }
+        .notification.danger { border-left: 4px solid var(--danger); }
+
+        .notification-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .notification-time {
+            font-size: 11px;
+            color: #a0aec0;
+        }
+
+        .notification-content {
+            font-size: 13px;
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+
+        .notification-metrics {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        #aiControls {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+        }
+
+        .ai-control-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .ai-control-btn.clear {
+            background: #f7fafc;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .ai-control-btn.clear:hover {
+            background: #e2e8f0;
+        }
+
+        .ai-control-btn.settings {
+            background: var(--info);
+            color: white;
+        }
+
+        .ai-control-btn.settings:hover {
+            background: #3182ce;
+        }
+
+        /* Dashboard de métricas en tiempo real */
+        #aiMetrics {
+            padding: 15px 20px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .metric-item {
+            text-align: center;
+            padding: 10px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .metric-label {
+            font-size: 10px;
+            color: #a0aec0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .metric-value.positive { color: var(--success); }
+        .metric-value.negative { color: var(--danger); }
+        .metric-value.warning { color: var(--warning); }
+
+        /* Responsive para el centro de operaciones */
+        @media (max-width: 768px) {
+            #aiPanel {
+                width: 95vw;
+                right: -15px;
+            }
+        }
+
+        /* Ocultar scrollbar pero mantener funcionalidad */
+        #aiNotifications::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #aiNotifications::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #aiNotifications::-webkit-scrollbar-thumb {
+            background: rgba(160, 174, 192, 0.3);
+            border-radius: 4px;
+        }
+
+        #aiNotifications::-webkit-scrollbar-thumb:hover {
+            background: rgba(160, 174, 192, 0.5);
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <div class="app-container">
+        <!-- Sección Principal -->
+        <div id="mainSection" class="section active">
+            <div class="header">
+                <h1>Sistema de Seguimiento de Operaciones</h1>
+                <div class="header-controls">
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        <span id="themeIcon">🌙</span>
+                        <span id="themeText">Modo Oscuro</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="date-selector">
+                    <label>Fecha:</label>
+                    <input type="date" id="selectedDate">
+                </div>
+                <button class="add-btn" onclick="openModal()">
+                    + Agregar Operación
+                </button>
+                <div class="divider"></div>
+                <button class="wally-btn" onclick="switchToWally()">
+                    🚀 Wally Tech
+                </button>
+                <select id="historySelector" onchange="loadHistoryDate()">
+                    <option value="">Ver historial por fecha</option>
+                </select>
+            </div>
+
+            <div class="summary">
+                <div class="summary-item">
+                    <div class="summary-label">Promedio Compra VES</div>
+                    <div class="summary-value" id="promCompra">0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Promedio Venta VES</div>
+                    <div class="summary-value" id="promVenta">0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Brecha</div>
+                    <div class="summary-value" id="brecha">0%</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Ganancias</div>
+                    <div class="summary-value profit" id="ganancias">0 VES / 0 USDC</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Total Operaciones</div>
+                    <div class="summary-value" id="totalOps">0</div>
+                </div>
+            </div>
+
+            <div class="table-header">
+                <h2>📋 Tabla de Operaciones</h2>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>USUARIO</th>
+                            <th>REF</th>
+                            <th>OPERACIÓN</th>
+                            <th>TASA</th>
+                            <th>MÉTODO DE PAGO</th>
+                            <th>Monto USDC</th>
+                            <th>Monto BS</th>
+                            <th>Comisión VES</th>
+                            <th>TOTAL</th>
+                            <th>/VES</th>
+                            <th>/USDC</th>
+                            <th>LOTE</th>
+                            <th>ESTATUS</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="operationsTable">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Sección Wally Tech -->
+        <div id="wallySection" class="section">
+            <div class="header wally-header">
+                <h1>Sistema Wally Tech - USD/USDC</h1>
+                <div class="header-controls">
+                    <button class="back-btn" onclick="switchToMain()">
+                        ← Regresar
+                    </button>
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        <span id="themeIcon2">🌙</span>
+                        <span id="themeText2">Modo Oscuro</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="date-selector">
+                    <label>Fecha:</label>
+                    <input type="date" id="wallySelectedDate">
+                </div>
+                <button class="add-btn" onclick="openWallyModal()">
+                    + Agregar Operación Wally
+                </button>
+                <select id="wallyHistorySelector" onchange="loadWallyHistoryDate()">
+                    <option value="">Ver historial por fecha</option>
+                </select>
+            </div>
+
+            <div class="wally-table">
+                <div class="wally-column compra">
+                    <h3>COMPRA - RECIBO USDC</h3>
+                    <div class="wally-table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>RECIBO USDC</th>
+                                    <th>TASA COMPRA</th>
+                                    <th>ENVIO USD</th>
+                                    <th>GANANCIA EN USDC</th>
+                                    <th>ACCIONES</th>
+                                </tr>
+                            </thead>
+                            <tbody id="wallyCompraTable">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="wally-column venta">
+                    <h3>VENTA - RECIBO USD</h3>
+                    <div class="wally-table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>RECIBO USD</th>
+                                    <th>TASA VENTA</th>
+                                    <th>ENVIO USDC</th>
+                                    <th>GANANCIA EN USD</th>
+                                    <th>ACCIONES</th>
+                                </tr>
+                            </thead>
+                            <tbody id="wallyVentaTable">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="wally-summary">
+                    <h3>Resumen Wally Tech</h3>
+                    <div class="wally-summary-grid">
+                        <div class="wally-summary-item">
+                            <div class="summary-label">VAL. INI. WALLY</div>
+                            <div class="summary-value" style="display:flex; align-items:center; gap:8px; justify-content:center;">
+                                <input type="number" id="wallyValorInicialInput" step="0.01" placeholder="0.00" 
+                                    onblur="saveWallyValorInicial()" class="wally-input">
+                                <button id="editWallyIniBtn" onclick="editWallyValorInicial()" style="display:none;" class="edit-icon">✏️</button>
+                            </div>
+                        </div>
+                        <div class="wally-summary-item">
+                            <div class="summary-label">VAL. ACT. WALLY</div>
+                            <div class="summary-value" id="wallyValorActual">0</div>
+                        </div>
+                        <div class="wally-summary-item">
+                            <div class="summary-label">GANANCIAS USDC/USD</div>
+                            <div class="summary-value" id="wallyGanancias">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para operaciones principales -->
+    <div id="operationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Agregar Nueva Operación</h2>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-sections">
+                    <!-- Información Básica -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <span>👤</span>
+                            Información Básica
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Usuario:</label>
+                                <input type="text" id="usuario" placeholder="Nombre del usuario" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Referencia:</label>
+                                <input type="text" id="referencia" placeholder="Número de referencia" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Operación:</label>
+                                <select id="operacion" onchange="updateFeeField()" required>
+                                    <option value="">Seleccionar operación...</option>
+                                    <option value="Compra">📈 Compra</option>
+                                    <option value="Venta">📉 Venta</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Método de Pago:</label>
+                                <select id="metodoPago" onchange="updateFeeField()" required>
+                                    <option value="">Seleccionar método...</option>
+                                    <option value="Pagomovil">💳 Pagomovil</option>
+                                    <option value="Banesco">🏦 Banesco</option>
+                                    <option value="Venezuela">🏛️ Venezuela</option>
+                                    <option value="Bancamiga">🏢 Bancamiga</option>
+                                    <option value="BNC">🏗️ BNC</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información Financiera -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <span>💰</span>
+                            Información Financiera
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Tasa de Cambio:</label>
+                                <input type="number" id="tasa" step="0.01" placeholder="0.00" onchange="calculateMontoBs()" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Monto USDC:</label>
+                                <input type="number" id="montoUsdc" step="0.01" placeholder="0.00" onchange="calculateMontoBs()" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Monto BS (Calculado):</label>
+                                <input type="number" id="montoBs" class="calculated" placeholder="Auto-calculado" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Comisión VES:</label>
+                                <input type="number" id="comisionVes" step="0.01" placeholder="0.00" onchange="calculateTotal()">
+                            </div>
+                            <div class="form-group">
+                                <label>Total (Calculado):</label>
+                                <input type="number" id="total" class="calculated" placeholder="Auto-calculado" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Estatus:</label>
+                                <select id="estatus" required>
+                                    <option value="">Seleccionar estatus...</option>
+                                    <option value="En Curso">🔄 En Curso</option>
+                                    <option value="En Disputa">⚠️ En Disputa</option>
+                                    <option value="Completado">✅ Completado</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información Adicional -->
+                    <button type="button" class="toggle-info-btn" onclick="toggleInfo()">
+                        <span id="infoIcon">▼</span> Información adicional
+                    </button>
+
+                    <div id="infoExtra" style="display: none;">
+                        <div class="form-section">
+                            <div class="section-title">
+                                <span>📋</span>
+                                Información Adicional
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>/VES:</label>
+                                    <input type="text" id="ves" placeholder="Ganancia VES">
+                                </div>
+                                <div class="form-group">
+                                    <label>/USDC:</label>
+                                    <input type="text" id="usdc" placeholder="Ganancia USDC">
+                                </div>
+                                <div class="form-group">
+                                    <label>Lote:</label>
+                                    <input type="text" id="lote" placeholder="Número de lote">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal()">
+                    ✖️ Cancelar
+                </button>
+                <button class="btn btn-green" onclick="pasteSpecial()">
+                    📋 Pegado Especial
+                </button>
+                <button class="btn btn-primary" onclick="saveOperation()">
+                    💾 Guardar Operación
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para operaciones Wally -->
+    <div id="wallyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="wallyModalTitle">Agregar Operación Wally Tech</h2>
+                <button class="close-btn" onclick="closeWallyModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-sections">
+                    <div class="form-section">
+                        <div class="section-title">
+                            <span>💱</span>
+                            Operación USD/USDC
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Tipo de Operación:</label>
+                                <select id="wallyOperacion" onchange="updateWallyFields()" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Compra">📈 Compra (Recibo USDC)</option>
+                                    <option value="Venta">📉 Venta (Recibo USD)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Método:</label>
+                                <select id="wallyMetodo" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Wally">🚀 Wally</option>
+                                    <option value="Syklo">⚡ Syklo</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="reciboUsdcGroup" style="display:none;">
+                                <label>Recibo USDC:</label>
+                                <input type="number" id="reciboUsdc" step="0.01" placeholder="0.00" onchange="calculateWallyCompra()">
+                            </div>
+                            <div class="form-group" id="reciboUsdGroup" style="display:none;">
+                                <label>Recibo USD:</label>
+                                <input type="number" id="reciboUsd" step="0.01" placeholder="0.00" onchange="calculateWallyVenta()">
+                            </div>
+                            <div class="form-group" id="tasaCompraGroup" style="display:none;">
+                                <label>Tasa Compra:</label>
+                                <input type="number" id="tasaCompra" step="0.001" placeholder="0.000" onchange="calculateWallyCompra()">
+                            </div>
+                            <div class="form-group" id="tasaVentaGroup" style="display:none;">
+                                <label>Tasa Venta:</label>
+                                <input type="number" id="tasaVenta" step="0.001" placeholder="0.000" onchange="calculateWallyVenta()">
+                            </div>
+                            <div class="form-group" id="envioUsdGroup" style="display:none;">
+                                <label>Envío USD (Calculado):</label>
+                                <input type="number" id="envioUsd" class="calculated" readonly>
+                            </div>
+                            <div class="form-group" id="envioUsdcGroup" style="display:none;">
+                                <label>Envío USDC (Calculado):</label>
+                                <input type="number" id="envioUsdc" class="calculated" readonly>
+                            </div>
+                            <div class="form-group" id="gananciaUsdcGroup" style="display:none;">
+                                <label>Ganancia USDC (Calculada):</label>
+                                <input type="number" id="gananciaUsdc" class="calculated" readonly>
+                            </div>
+                            <div class="form-group" id="gananciaUsdGroup" style="display:none;">
+                                <label>Ganancia USD (Calculada):</label>
+                                <input type="number" id="gananciaUsd" class="calculated" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeWallyModal()">
+                    ✖️ Cancelar
+                </button>
+                <button class="btn btn-primary" onclick="saveWallyOperation()">
+                    💾 Guardar Operación
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Centro de Operaciones IA -->
+    <div id="aiOperationsCenter">
+        <button id="aiToggleBtn">
+            🤖
+            <div id="aiNotificationBadge">0</div>
+        </button>
+        
+        <div id="aiPanel">
+            <!-- Header -->
+            <div id="aiHeader">
+                <span>🧠</span>
+                <h3>Centro de Operaciones IA</h3>
+            </div>
+
+            <!-- Estado del Sistema -->
+            <div id="aiStatus">
+                <div class="status-indicator" id="statusIndicator"></div>
+                <span id="statusText">Sistema Activo - Monitoreando</span>
+            </div>
+
+            <!-- Métricas en Tiempo Real -->
+            <div id="aiMetrics">
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <div class="metric-label">Brecha Actual</div>
+                        <div class="metric-value" id="currentGap">0%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Lotes Activos</div>
+                        <div class="metric-value" id="activeLots">0</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Ganancia Hoy</div>
+                        <div class="metric-value positive" id="dailyProfit">0 VES / 0 USDC</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Recompra Pendiente</div>
+                        <div class="metric-value" id="pendingRepurchase">0 USDC</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notificaciones -->
+            <div id="aiNotifications">
+                <div class="notification info">
+                    <div class="notification-header">
+                        <div class="notification-title">
+                            <span>👋</span>
+                            Sistema Inicializado
+                        </div>
+                        <div class="notification-time">Ahora</div>
+                    </div>
+                    <div class="notification-content">
+                        IA activada y lista para monitorear tus operaciones. Te mantendré informado de todos los movimientos importantes.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controles -->
+            <div id="aiControls">
+                <button class="ai-control-btn clear" onclick="clearNotifications()">
+                    🗑️ Limpiar
+                </button>
+                <button class="ai-control-btn settings" onclick="toggleAISettings()">
+                    ⚙️ Config
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== VARIABLES GLOBALES Y FUNCIONES DE LA TABLA DE OPERACIONES =====
+        let operations = [];
+        let wallyOperations = [];
+        let editingIndex = -1;
+        let editingWallyIndex = -1;
+        let currentDate = new Date().toISOString().split('T')[0];
+        let currentWallyDate = new Date().toISOString().split('T')[0];
+        let currentSection = 'main';
+
+        // Inicializar la aplicación
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('selectedDate').value = currentDate;
+            document.getElementById('wallySelectedDate').value = currentWallyDate;
+            loadOperations();
+            loadWallyOperations();
+            updateHistorySelector();
+            updateWallyHistorySelector();
+            loadTheme();
+            loadWallyValorInicial();
+        });
+
+        // Funciones de navegación entre secciones
+        function switchToWally() {
+            document.getElementById('mainSection').classList.remove('active');
+            document.getElementById('wallySection').classList.add('active');
+            currentSection = 'wally';
+        }
+
+        function switchToMain() {
+            document.getElementById('wallySection').classList.remove('active');
+            document.getElementById('mainSection').classList.add('active');
+            currentSection = 'main';
+        }
+
+        // Funciones de tema
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeButtons(newTheme);
+        }
+
+        function updateThemeButtons(theme) {
+            const icons = document.querySelectorAll('[id^="themeIcon"]');
+            const texts = document.querySelectorAll('[id^="themeText"]');
+            
+            icons.forEach(icon => {
+                icon.textContent = theme === 'light' ? '🌙' : '☀️';
+            });
+            
+            texts.forEach(text => {
+                text.textContent = theme === 'light' ? 'Modo Oscuro' : 'Modo Claro';
+            });
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+            updateThemeButtons(savedTheme);
+        }
+
+        // Funciones del modal principal
+        function openModal() {
+            editingIndex = -1;
+            document.getElementById('modalTitle').textContent = 'Agregar Nueva Operación';
+            clearForm();
+            document.getElementById('operationModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('operationModal').style.display = 'none';
+            clearForm();
+        }
+
+        function clearForm() {
+            const form = document.getElementById('operationModal');
+            const inputs = form.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.value = '';
+                input.classList.remove('disabled-field');
+                input.readOnly = false;
+            });
+        }
+
+        // Funciones del modal Wally
+        function openWallyModal() {
+            editingWallyIndex = -1;
+            document.getElementById('wallyModalTitle').textContent = 'Agregar Operación Wally Tech';
+            clearWallyForm();
+            document.getElementById('wallyModal').style.display = 'block';
+        }
+
+        function closeWallyModal() {
+            document.getElementById('wallyModal').style.display = 'none';
+            clearWallyForm();
+        }
+
+        function clearWallyForm() {
+            const form = document.getElementById('wallyModal');
+            const inputs = form.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.value = '';
+            });
+            updateWallyFields();
+        }
+
+        // Funciones de cálculo principal
+        function updateFeeField() {
+            const operacion = document.getElementById('operacion').value;
+            const metodoPago = document.getElementById('metodoPago').value;
+            const comisionField = document.getElementById('comisionVes');
+            
+            if (operacion === 'Venta' || metodoPago !== 'Pagomovil') {
+                comisionField.value = '0';
+                comisionField.classList.add('disabled-field');
+                comisionField.readOnly = true;
+            } else {
+                comisionField.classList.remove('disabled-field');
+                comisionField.readOnly = false;
+                if (operacion === 'Compra' && metodoPago === 'Pagomovil') {
+                    calculateFee();
+                }
+            }
+            calculateTotal();
+        }
+
+        function calculateMontoBs() {
+            const tasa = parseFloat(document.getElementById('tasa').value) || 0;
+            const montoUsdc = parseFloat(document.getElementById('montoUsdc').value) || 0;
+            const montoBs = tasa * montoUsdc;
+            
+            document.getElementById('montoBs').value = montoBs.toFixed(2);
+            
+            if (document.getElementById('operacion').value === 'Compra' && 
+                document.getElementById('metodoPago').value === 'Pagomovil') {
+                calculateFee();
+            }
+            calculateTotal();
+        }
+
+        function calculateFee() {
+            const montoBs = parseFloat(document.getElementById('montoBs').value) || 0;
+            const fee = montoBs * 0.003;
+            document.getElementById('comisionVes').value = fee.toFixed(2);
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            const montoBs = parseFloat(document.getElementById('montoBs').value) || 0;
+            const comisionVes = parseFloat(document.getElementById('comisionVes').value) || 0;
+            const total = montoBs + comisionVes;
+            
+            document.getElementById('total').value = total.toFixed(2);
+        }
+
+        // Funciones de cálculo Wally
+        function updateWallyFields() {
+            const operacion = document.getElementById('wallyOperacion').value;
+            
+            // Ocultar todos los grupos
+            const groups = ['reciboUsdcGroup', 'reciboUsdGroup', 'tasaCompraGroup', 'tasaVentaGroup', 
+                           'envioUsdGroup', 'envioUsdcGroup', 'gananciaUsdcGroup', 'gananciaUsdGroup'];
+            
+            groups.forEach(groupId => {
+                document.getElementById(groupId).style.display = 'none';
+            });
+
+            if (operacion === 'Compra') {
+                document.getElementById('reciboUsdcGroup').style.display = 'block';
+                document.getElementById('tasaCompraGroup').style.display = 'block';
+                document.getElementById('envioUsdGroup').style.display = 'block';
+                document.getElementById('gananciaUsdcGroup').style.display = 'block';
+            } else if (operacion === 'Venta') {
+                document.getElementById('reciboUsdGroup').style.display = 'block';
+                document.getElementById('tasaVentaGroup').style.display = 'block';
+                document.getElementById('envioUsdcGroup').style.display = 'block';
+                document.getElementById('gananciaUsdGroup').style.display = 'block';
+            }
+        }
+
+        function calculateWallyCompra() {
+            const reciboUsdc = parseFloat(document.getElementById('reciboUsdc').value) || 0;
+            const tasaCompra = parseFloat(document.getElementById('tasaCompra').value) || 0;
+            
+            const envioUsd = reciboUsdc * tasaCompra;
+            document.getElementById('envioUsd').value = envioUsd.toFixed(2);
+            
+            const gananciaUsdc = Math.abs(envioUsd - reciboUsdc);
+            document.getElementById('gananciaUsdc').value = gananciaUsdc.toFixed(4);
+        }
+
+        function calculateWallyVenta() {
+            const reciboUsd = parseFloat(document.getElementById('reciboUsd').value) || 0;
+            const tasaVenta = parseFloat(document.getElementById('tasaVenta').value) || 0;
+            
+            const envioUsdc = reciboUsd * tasaVenta;
+            document.getElementById('envioUsdc').value = envioUsdc.toFixed(2);
+            
+            const gananciaUsd = Math.abs(envioUsdc - reciboUsd);
+            document.getElementById('gananciaUsd').value = gananciaUsd.toFixed(4);
+        }
+
+        // Funciones de guardado principal
+        function saveOperation() {
+            const operation = {
+                usuario: document.getElementById('usuario').value,
+                referencia: document.getElementById('referencia').value,
+                operacion: document.getElementById('operacion').value,
+                tasa: parseFloat(document.getElementById('tasa').value),
+                metodoPago: document.getElementById('metodoPago').value,
+                montoUsdc: parseFloat(document.getElementById('montoUsdc').value),
+                montoBs: parseFloat(document.getElementById('montoBs').value),
+                comisionVes: parseFloat(document.getElementById('comisionVes').value) || 0,
+                total: parseFloat(document.getElementById('total').value),
+                ves: document.getElementById('ves').value,
+                usdc: document.getElementById('usdc').value,
+                lote: document.getElementById('lote').value,
+                estatus: document.getElementById('estatus').value,
+                fecha: currentDate,
+                timestamp: Date.now()
+            };
+
+            // Validación
+            if (!operation.usuario || !operation.referencia || !operation.operacion || 
+                !operation.tasa || !operation.metodoPago || !operation.montoUsdc || !operation.estatus) {
+                alert('Por favor, complete todos los campos obligatorios');
+                return;
+            }
+
+            if (editingIndex >= 0) {
+                operations[editingIndex] = operation;
+            } else {
+                operations.unshift(operation);
+            }
+
+            saveOperations();
+            renderTable();
+            updateSummary();
+            closeModal();
+            
+            // Notificar al centro de operaciones IA
+            if (window.aiCenter) {
+                if (editingIndex >= 0) {
+                    window.notifyAIEditOperation(operation);
+                } else {
+                    window.notifyAINewOperation(operation);
+                }
+            }
+        }
+
+        async function pasteSpecial() {
+            try {
+                const text = await navigator.clipboard.readText();
+                const refMatch = text.match(/-\s*([a-z0-9]{8})/i);
+                const usuarioMatch = text.match(/Contraparte:\s*([A-Z0-9\.]+)/i);
+                const montoUsdcMatch = text.match(/Monto recibido:\s*([\d\.]+)\s*USDC/i);
+                const tasaMatch = text.match(/Precio:\s*([\d\.]+)/i);
+                const estatusMatch = text.match(/Transacción\s+completada/i);
+
+                if (usuarioMatch) document.getElementById("usuario").value = usuarioMatch[1];
+                if (refMatch) document.getElementById("referencia").value = refMatch[1];
+                if (tasaMatch) document.getElementById("tasa").value = tasaMatch[1];
+                if (montoUsdcMatch) document.getElementById("montoUsdc").value = montoUsdcMatch[1];
+                if (estatusMatch) document.getElementById("estatus").value = "Completado";
+
+                calculateMontoBs();
+            } catch (err) {
+                alert("No se pudo leer el portapapeles. Asegúrate de dar permisos.");
+                console.error(err);
+            }
+        }
+
+        // Funciones de guardado Wally
+        function saveWallyOperation() {
+            const operacion = document.getElementById('wallyOperacion').value;
+            let operation = {
+                operacion: operacion,
+                metodo: document.getElementById('wallyMetodo').value,
+                fecha: currentWallyDate,
+                timestamp: Date.now()
+            };
+
+            if (operacion === 'Compra') {
+                operation.reciboUsdc = parseFloat(document.getElementById('reciboUsdc').value);
+                operation.tasaCompra = parseFloat(document.getElementById('tasaCompra').value);
+                operation.envioUsd = parseFloat(document.getElementById('envioUsd').value);
+                operation.gananciaUsdc = parseFloat(document.getElementById('gananciaUsdc').value);
+            } else if (operacion === 'Venta') {
+                operation.reciboUsd = parseFloat(document.getElementById('reciboUsd').value);
+                operation.tasaVenta = parseFloat(document.getElementById('tasaVenta').value);
+                operation.envioUsdc = parseFloat(document.getElementById('envioUsdc').value);
+                operation.gananciaUsd = parseFloat(document.getElementById('gananciaUsd').value);
+            }
+
+            // Validación
+            if (!operation.operacion || !operation.metodo) {
+                alert('Por favor, complete todos los campos obligatorios');
+                return;
+            }
+
+            if (editingWallyIndex >= 0) {
+                wallyOperations[editingWallyIndex] = operation;
+            } else {
+                wallyOperations.unshift(operation);
+            }
+
+            saveWallyOperations();
+            renderWallyTables();
+            updateWallySummary();
+            closeWallyModal();
+        }
+
+        // Funciones de renderizado principal
+        function renderTable() {
+            const tbody = document.getElementById('operationsTable');
+            const currentOps = operations.filter(op => op.fecha === currentDate);
+            
+            tbody.innerHTML = currentOps.map((op, index) => {
+                const globalIndex = operations.indexOf(op);
+                return `
+                    <tr class="${op.operacion.toLowerCase()}">
+                        <td>${op.usuario}</td>
+                        <td>${op.referencia}</td>
+                        <td>${op.operacion}</td>
+                        <td>${op.tasa.toFixed(2)}</td>
+                        <td>${op.metodoPago}</td>
+                        <td>${op.montoUsdc.toFixed(2)}</td>
+                        <td>${op.montoBs.toFixed(2)}</td>
+                        <td>${op.comisionVes.toFixed(2)}</td>
+                        <td>${op.total.toFixed(2)}</td>
+                        <td>${op.ves}</td>
+                        <td>${op.usdc}</td>
+                        <td>
+                            <div class="lote-scroll">${op.lote || ''}</div>
+                        </td>
+                        <td><span class="status-${op.estatus.toLowerCase().replace(' ', '-')}">${op.estatus}</span></td>
+                        <td>
+                            <button class="edit-btn" onclick="editOperation(${globalIndex})">Editar</button>
+                            <button class="delete-btn" onclick="deleteOperation(${globalIndex})">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Funciones de renderizado Wally
+        function renderWallyTables() {
+            const currentOps = wallyOperations.filter(op => op.fecha === currentWallyDate);
+            const compras = currentOps.filter(op => op.operacion === 'Compra');
+            const ventas = currentOps.filter(op => op.operacion === 'Venta');
+            
+            // Tabla de compras
+            document.getElementById('wallyCompraTable').innerHTML = compras.map((op) => {
+                const globalIndex = wallyOperations.indexOf(op);
+                return `
+                    <tr>
+                        <td>${(Number(op.reciboUsdc) || 0).toFixed(2)}</td>
+                        <td>${(Number(op.tasaCompra) || 0).toFixed(3)}</td>
+                        <td>${(Number(op.envioUsd) || 0).toFixed(2)}</td>
+                        <td>${(Number(op.gananciaUsdc) || 0).toFixed(4)}</td>
+                        <td>
+                            <button class="edit-btn" onclick="editWallyOperation(${globalIndex})">Editar</button>
+                            <button class="delete-btn" onclick="deleteWallyOperation(${globalIndex})">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Tabla de ventas
+            document.getElementById('wallyVentaTable').innerHTML = ventas.map((op) => {
+                const globalIndex = wallyOperations.indexOf(op);
+                return `
+                    <tr>
+                        <td>${(Number(op.reciboUsd) || 0).toFixed(2)}</td>
+                        <td>${(Number(op.tasaVenta) || 0).toFixed(3)}</td>
+                        <td>${(Number(op.envioUsdc) || 0).toFixed(2)}</td>
+                        <td>${(Number(op.gananciaUsd) || 0).toFixed(4)}</td>
+                        <td>
+                            <button class="edit-btn" onclick="editWallyOperation(${globalIndex})">Editar</button>
+                            <button class="delete-btn" onclick="deleteWallyOperation(${globalIndex})">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Función para editar una operación Wally
+        function editWallyOperation(index) {
+            if (typeof index !== 'number' || index < 0 || index >= wallyOperations.length) return;
+            editingWallyIndex = index;
+            const op = wallyOperations[index];
+
+            document.getElementById('wallyModalTitle').textContent = 'Editar Operación Wally Tech';
+            document.getElementById('wallyOperacion').value = op.operacion || '';
+            document.getElementById('wallyMetodo').value = op.metodo || '';
+            updateWallyFields();
+
+            if (op.operacion === 'Compra') {
+                document.getElementById('reciboUsdc').value = op.reciboUsdc != null ? op.reciboUsdc : '';
+                document.getElementById('tasaCompra').value = op.tasaCompra != null ? op.tasaCompra : '';
+                document.getElementById('envioUsd').value = op.envioUsd != null ? Number(op.envioUsd).toFixed(2) : '';
+                document.getElementById('gananciaUsdc').value = op.gananciaUsdc != null ? Number(op.gananciaUsdc).toFixed(4) : '';
+            } else if (op.operacion === 'Venta') {
+                document.getElementById('reciboUsd').value = op.reciboUsd != null ? op.reciboUsd : '';
+                document.getElementById('tasaVenta').value = op.tasaVenta != null ? op.tasaVenta : '';
+                document.getElementById('envioUsdc').value = op.envioUsdc != null ? Number(op.envioUsdc).toFixed(2) : '';
+                document.getElementById('gananciaUsd').value = op.gananciaUsd != null ? Number(op.gananciaUsd).toFixed(4) : '';
+            }
+
+            document.getElementById('wallyModal').style.display = 'block';
+        }
+
+        // Función para eliminar una operación Wally
+        function deleteWallyOperation(index) {
+            if (typeof index !== 'number' || index < 0 || index >= wallyOperations.length) return;
+            if (!confirm('¿Está seguro de eliminar esta operación Wally?')) return;
+
+            wallyOperations.splice(index, 1);
+            saveWallyOperations();
+            renderWallyTables();
+            updateWallySummary();
+            updateWallyHistorySelector();
+        }
+
+        // Helper: Aplica FIFO sobre las operaciones
+        function applyFIFOForDate(fecha) {
+            const ops = operations
+                .map((op, idx) => ({ op, idx }))
+                .filter(x => x.op.fecha === fecha)
+                .sort((a, b) => (a.op.timestamp || 0) - (b.op.timestamp || 0));
+
+            ops.forEach(item => {
+                const o = item.op;
+                o._gainVes = 0;
+                o._gainUsdc = 0;
+                o._assignedLots = [];
+                o._remainingUsdc = (o.operacion === 'Compra') ? (Number(o.montoUsdc) || 0) : 0;
+            });
+
+            let purchaseQueue = ops
+                .filter(item => item.op.operacion === 'Compra' && (Number(item.op.montoUsdc) || 0) > 0)
+                .map(item => ({
+                    op: item.op,
+                    idx: item.idx,
+                    remaining: Number(item.op.montoUsdc) || 0,
+                    tasa: Number(item.op.tasa) || 0
+                }));
+
+            const sales = ops
+                .filter(item => item.op.operacion === 'Venta' && (Number(item.op.montoUsdc) || 0) > 0)
+                .map(item => ({
+                    op: item.op,
+                    idx: item.idx,
+                    montoUsdc: Number(item.op.montoUsdc) || 0,
+                    tasa: Number(item.op.tasa) || 0,
+                    comisionVes: Number(item.op.comisionVes) || 0,
+                    timestamp: item.op.timestamp || 0
+                }))
+                .sort((a, b) => a.timestamp - b.timestamp);
+
+            let lotCounter = 1;
+
+            sales.forEach(sale => {
+                let remainingToMatch = sale.montoUsdc;
+                const lotId = `L${lotCounter++}`;
+                sale.op._assignedLots = sale.op._assignedLots || [];
+                sale.op._gainVes = sale.op._gainVes || 0;
+                sale.op._gainUsdc = sale.op._gainUsdc || 0;
+                sale.op.lote = lotId;
+
+                while (remainingToMatch > 0 && purchaseQueue.length > 0) {
+                    const head = purchaseQueue[0];
+                    const consume = Math.min(remainingToMatch, head.remaining);
+
+                    const costVes = consume * (head.tasa || 0);
+                    const revenueVes = consume * (sale.tasa || 0);
+                    const commissionPortion = sale.comisionVes * (consume / (sale.montoUsdc || 1));
+
+                    const gainVes = revenueVes - costVes - commissionPortion;
+                    const divisor = head.tasa || sale.tasa || 1;
+                    const gainUsdc = gainVes / divisor;
+
+                    sale.op._gainVes += gainVes;
+                    sale.op._gainUsdc += gainUsdc;
+
+                    head.op._gainVes = (head.op._gainVes || 0) + gainVes;
+                    head.op._gainUsdc = (head.op._gainUsdc || 0) + gainUsdc;
+                    head.op._assignedLots = head.op._assignedLots || [];
+                    head.op._assignedLots.push({ lot: lotId, amount: consume });
+
+                    head.remaining -= consume;
+                    head.op._remainingUsdc = head.remaining;
+                    remainingToMatch -= consume;
+
+                    if (head.remaining <= 0) {
+                        purchaseQueue.shift();
+                    }
+                }
+
+                if (remainingToMatch > 0) {
+                    const revenueVes = remainingToMatch * (sale.tasa || 0);
+                    const commissionPortion = sale.comisionVes * (remainingToMatch / (sale.montoUsdc || 1));
+                    const gainVes = revenueVes - commissionPortion;
+                    const gainUsdc = gainVes / (sale.tasa || 1);
+
+                    sale.op._gainVes += gainVes;
+                    sale.op._gainUsdc += gainUsdc;
+                    remainingToMatch = 0;
+                }
+            });
+
+            ops.forEach(item => {
+                const o = item.op;
+                o.ves = Number((o._gainVes || 0).toFixed(2));
+                o.usdc = Number((o._gainUsdc || 0).toFixed(6));
+
+                if (o.operacion === 'Compra') {
+                    if (o._assignedLots && o._assignedLots.length > 0) {
+                        o.lote = o._assignedLots.map(a => `${a.lot}(${Number(a.amount).toFixed(2)})`).join(',');
+                    }
+                }
+
+                delete o._assignedLots;
+                delete o._remainingUsdc;
+                delete o._gainVes;
+                delete o._gainUsdc;
+            });
+
+            saveOperations();
+        }
+
+        // Actualizar resumen
+        function updateSummary() {
+            const currentOps = operations.filter(op => op.fecha === currentDate);
+            const compras = currentOps.filter(op => op.operacion === 'Compra');
+            const ventas = currentOps.filter(op => op.operacion === 'Venta');
+            
+            const promCompra = compras.length > 0 ? 
+                compras.reduce((sum, op) => sum + (Number(op.tasa) || 0), 0) / compras.length : 0;
+            const promVenta = ventas.length > 0 ? 
+                ventas.reduce((sum, op) => sum + (Number(op.tasa) || 0), 0) / ventas.length : 0;
+            
+            const brecha = promVenta > 0 && promCompra > 0 ? 
+                ((promVenta - promCompra) / promCompra * 100) : 0;
+            
+            document.getElementById('promCompra').textContent = promCompra.toFixed(2);
+            document.getElementById('promVenta').textContent = promVenta.toFixed(2);
+            document.getElementById('brecha').textContent = brecha.toFixed(2) + '%';
+            
+            applyFIFOForDate(currentDate);
+
+            const gananciasVesSoloCompras = currentOps
+                .filter(op => op.operacion === 'Compra')
+                .reduce((sum, op) => sum + (Number(op.ves) || 0), 0);
+
+            const gananciasUsdcSoloCompras = currentOps
+                .filter(op => op.operacion === 'Compra')
+                .reduce((sum, op) => sum + (Number(op.usdc) || 0), 0);
+
+            document.getElementById('ganancias').innerHTML = `
+                <div>${gananciasVesSoloCompras.toFixed(2)} VES</div>
+                <div>${gananciasUsdcSoloCompras.toFixed(2)} USDC</div>
+            `;
+
+            document.getElementById('totalOps').textContent = currentOps.length;
+            renderTable();
+        }
+
+        function updateWallySummary() {
+            const currentOps = wallyOperations.filter(op => op.fecha === currentWallyDate);
+            const compras = currentOps.filter(op => op.operacion === 'Compra');
+            const ventas = currentOps.filter(op => op.operacion === 'Venta');
+
+            const totalEnvioUsd_fromCompras = compras.reduce((s, op) => s + (Number(op.envioUsd) || 0), 0);
+            const totalEnvioUsdc_fromVentas = ventas.reduce((s, op) => s + (Number(op.envioUsdc) || 0), 0);
+
+            const iniValue = parseFloat(localStorage.getItem("wallyValorInicial")) || 0;
+            const valAct = iniValue - totalEnvioUsd_fromCompras + totalEnvioUsdc_fromVentas;
+
+            document.getElementById("wallyValorActual").textContent = `${valAct.toFixed(2)}`;
+
+            const totalGananciaUsdc = compras.reduce((s, op) => s + (Number(op.gananciaUsdc) || 0), 0);
+            const totalGananciaUsd = ventas.reduce((s, op) => s + (Number(op.gananciaUsd) || 0), 0);
+
+            document.getElementById("wallyGanancias").textContent =
+                `${totalGananciaUsdc.toFixed(2)} USDC / ${totalGananciaUsd.toFixed(2)} USD`;
+        }
+
+        function editOperation(index) {
+            editingIndex = index;
+            const op = operations[index];
+            
+            document.getElementById('modalTitle').textContent = 'Editar Operación';
+            document.getElementById('usuario').value = op.usuario;
+            document.getElementById('referencia').value = op.referencia;
+            document.getElementById('operacion').value = op.operacion;
+            document.getElementById('tasa').value = op.tasa;
+            document.getElementById('metodoPago').value = op.metodoPago;
+            document.getElementById('montoUsdc').value = op.montoUsdc;
+            document.getElementById('montoBs').value = op.montoBs;
+            document.getElementById('comisionVes').value = op.comisionVes;
+            document.getElementById('total').value = op.total;
+            document.getElementById('ves').value = op.ves;
+            document.getElementById('usdc').value = op.usdc;
+            document.getElementById('lote').value = op.lote;
+            document.getElementById('estatus').value = op.estatus;
+            
+            updateFeeField();
+            document.getElementById('operationModal').style.display = 'block';
+        }
+
+        function deleteOperation(index) {
+            if (confirm('¿Está seguro de eliminar esta operación?')) {
+                operations.splice(index, 1);
+                saveOperations();
+                renderTable();
+                updateSummary();
+            }
+        }
+
+        // Funciones de almacenamiento
+        function saveOperations() {
+            localStorage.setItem('operations', JSON.stringify(operations));
+        }
+
+        function loadOperations() {
+            currentDate = document.getElementById('selectedDate').value;
+            operations = JSON.parse(localStorage.getItem('operations') || '[]');
+            renderTable();
+            updateSummary();
+        }
+
+        function saveWallyOperations() {
+            localStorage.setItem('wallyOperations', JSON.stringify(wallyOperations));
+        }
+
+        function loadWallyOperations() {
+            currentWallyDate = document.getElementById('wallySelectedDate').value;
+            wallyOperations = JSON.parse(localStorage.getItem('wallyOperations') || '[]');
+            renderWallyTables();
+            updateWallySummary();
+        }
+
+        function updateHistorySelector() {
+            const dates = [...new Set(operations.map(op => op.fecha))].sort().reverse();
+            const selector = document.getElementById('historySelector');
+            
+            selector.innerHTML = '<option value="">Ver historial por fecha</option>' +
+                dates.map(date => `<option value="${date}">${date}</option>`).join('');
+        }
+
+        function updateWallyHistorySelector() {
+            const dates = [...new Set(wallyOperations.map(op => op.fecha))].sort().reverse();
+            const selector = document.getElementById('wallyHistorySelector');
+            
+            selector.innerHTML = '<option value="">Ver historial por fecha</option>' +
+                dates.map(date => `<option value="${date}">${date}</option>`).join('');
+        }
+
+        function loadHistoryDate() {
+            const selectedDate = document.getElementById('historySelector').value;
+            if (selectedDate) {
+                document.getElementById('selectedDate').value = selectedDate;
+                currentDate = selectedDate;
+                loadOperations();
+            }
+        }
+
+        function loadWallyHistoryDate() {
+            const selectedDate = document.getElementById('wallyHistorySelector').value;
+            if (selectedDate) {
+                document.getElementById('wallySelectedDate').value = selectedDate;
+                currentWallyDate = selectedDate;
+                loadWallyOperations();
+            }
+        }
+
+        // Event listeners para cambio de fecha
+        document.getElementById('selectedDate').addEventListener('change', function() {
+            loadOperations();
+            updateHistorySelector();
+        });
+
+        document.getElementById('wallySelectedDate').addEventListener('change', function() {
+            loadWallyOperations();
+            updateWallyHistorySelector();
+        });
+
+        // Cerrar modales al hacer clic fuera
+        window.onclick = function(event) {
+            const operationModal = document.getElementById('operationModal');
+            const wallyModal = document.getElementById('wallyModal');
+            const aiPanel = document.getElementById('aiPanel');
+            
+            if (event.target === operationModal) {
+                closeModal();
+            }
+            if (event.target === wallyModal) {
+                closeWallyModal();
+            }
+            if (!document.getElementById('aiOperationsCenter').contains(event.target) && 
+                aiPanel.style.display === 'flex') {
+                document.getElementById('aiPanel').style.display = 'none';
+                window.aiCenter.isOpen = false;
+            }
+        }
+
+        function toggleInfo() {
+            const extra = document.getElementById("infoExtra");
+            const icon = document.getElementById("infoIcon");
+            const isHidden = extra.style.display === "none" || extra.style.display === "";
+            extra.style.display = isHidden ? "block" : "none";
+            icon.textContent = isHidden ? "▲" : "▼";
+        }
+
+        function saveWallyValorInicial() {
+            const input = document.getElementById("wallyValorInicialInput");
+            const editBtn = document.getElementById("editWallyIniBtn");
+            const value = parseFloat(input.value) || 0;
+
+            if (value > 0) {
+                localStorage.setItem("wallyValorInicial", value.toFixed(2));
+                input.value = value.toFixed(2);
+                input.readOnly = true;
+                editBtn.style.display = "inline";
+                updateWallySummary();
+            }
+        }
+
+        function editWallyValorInicial() {
+            const input = document.getElementById("wallyValorInicialInput");
+            const editBtn = document.getElementById("editWallyIniBtn");
+            input.readOnly = false;
+            input.focus();
+            editBtn.style.display = "none";
+        }
+
+        function loadWallyValorInicial() {
+            const input = document.getElementById("wallyValorInicialInput");
+            const editBtn = document.getElementById("editWallyIniBtn");
+            const saved = localStorage.getItem("wallyValorInicial");
+            if (saved) {
+                input.value = saved;
+                input.readOnly = true;
+                editBtn.style.display = "inline";
+            }
+        }
+
+        // ===== SISTEMA DE INTELIGENCIA ARTIFICIAL =====
+        class AIOperationsCenter {
+            constructor() {
+                this.notifications = [];
+                this.isOpen = false;
+                this.processedOperations = new Set();
+                this.lastOperationCount = 0;
+                this.lastLotStates = new Map();
+                this.lastMetrics = {
+                    brecha: 0,
+                    ganancias: { ves: 0, usdc: 0 },
+                    operationsCount: 0
+                };
+                this.alertThresholds = {
+                    brechaMin: 2,
+                    brechaMax: 4,
+                    muchoLotes: 3
+                };
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.loadNotifications();
+                this.startMonitoring();
+            }
+
+            setupEventListeners() {
+                document.getElementById('aiToggleBtn').onclick = () => this.toggle();
+            }
+
+            toggle() {
+                if (this.isOpen) {
+                    this.close();
+                } else {
+                    this.open();
+                }
+            }
+
+            open() {
+                document.getElementById('aiPanel').style.display = 'flex';
+                this.isOpen = true;
+                this.clearNotificationBadge();
+                this.updateMetrics();
+            }
+
+            close() {
+                document.getElementById('aiPanel').style.display = 'none';
+                this.isOpen = false;
+            }
+
+            analyzeOperations(operations, currentDate) {
+                if (!operations || operations.length === 0) return;
+                const todayOps = operations.filter(op => op.fecha === currentDate);
+                if (todayOps.length === this.lastOperationCount) return;
+                const newOperations = todayOps.slice(this.lastOperationCount);
+                
+                newOperations.forEach(op => {
+                    this.processNewOperation(op);
+                });
+
+                this.analyzeLotChangesWithFIFO(todayOps);
+                this.analyzeBreach(todayOps);
+                this.analyzeGainsSynchronized(todayOps);
+                this.lastOperationCount = todayOps.length;
+                this.updateMetrics();
+            }
+
+            processNewOperation(operation) {
+                const operationKey = `${operation.fecha}-${operation.usuario}-${operation.operacion}-${operation.montoUsdc}-${operation.tasa}-${operation.timestamp}`;
+                if (this.processedOperations.has(operationKey)) return;
+                this.processedOperations.add(operationKey);
+
+                const gananciaUsdc = parseFloat(operation.usdc) || 0;
+                const gananciaVes = parseFloat(operation.ves) || 0;
+                
+                this.addNotification('success', 
+                    `${operation.operacion} Registrada`, 
+                    `${operation.usuario}: ${operation.operacion} de ${operation.montoUsdc} USDC a ${operation.tasa}`, {
+                    usuario: operation.usuario,
+                    monto: `${operation.montoUsdc} USDC`,
+                    tasa: operation.tasa,
+                    gananciaUsdc: `${gananciaUsdc.toFixed(4)} USDC`,
+                    gananciaVes: `${gananciaVes.toFixed(2)} VES`
+                });
+            }
+
+            analyzeLotChangesWithFIFO(operations) {
+                const currentLots = this.extractLotsFromFIFOSystem(operations);
+                const previousLots = this.lastLotStates;
+                
+                previousLots.forEach((prevLot, lotId) => {
+                    const currentLot = currentLots.get(lotId);
+                    if (prevLot.estado === 'activo' && (!currentLot || currentLot.estado === 'cerrado')) {
+                        const lotKey = `closed_${lotId}`;
+                        if (!this.processedOperations.has(lotKey)) {
+                            this.processedOperations.add(lotKey);
+                            const ganancia = this.calculateLotTotalGain(lotId, operations);
+                            this.addNotification('success', 
+                                '✅ Lote Completado', 
+                                `Lote ${lotId} cerrado completamente`, {
+                                loteId: lotId,
+                                gananciaTotal: `${ganancia.ves.toFixed(2)} VES / ${ganancia.usdc.toFixed(4)} USDC`,
+                                estado: 'Cerrado'
+                            });
+                        }
+                    }
+                });
+
+                currentLots.forEach((currentLot, lotId) => {
+                    if (!previousLots.has(lotId)) {
+                        const lotKey = `new_${lotId}`;
+                        if (!this.processedOperations.has(lotKey)) {
+                            this.processedOperations.add(lotKey);
+                            this.addNotification('info', 
+                                '📦 Nuevo Lote Creado', 
+                                `Lote ${lotId} iniciado`, {
+                                loteId: lotId,
+                                estado: 'Activo'
+                            });
+                        }
+                    }
+                });
+
+                currentLots.forEach((currentLot, lotId) => {
+                    const prevLot = previousLots.get(lotId);
+                    if (prevLot && prevLot.progreso !== currentLot.progreso && currentLot.estado === 'activo') {
+                        const progressKey = `progress_${lotId}_${currentLot.progreso}`;
+                        if (!this.processedOperations.has(progressKey)) {
+                            this.processedOperations.add(progressKey);
+                            this.addNotification('info', 
+                                '📊 Progreso de Lote', 
+                                `Lote ${lotId}: ${currentLot.progreso.toFixed(1)}% completado`, {
+                                loteId: lotId,
+                                progreso: `${currentLot.progreso.toFixed(1)}%`,
+                                restante: `${(100 - currentLot.progreso).toFixed(1)}%`
+                            });
+                        }
+                    }
+                });
+
+                const lotesActivos = Array.from(currentLots.values()).filter(lote => lote.estado === 'activo').length;
+                const prevLotesActivos = Array.from(previousLots.values()).filter(lote => lote.estado === 'activo').length;
+                if (lotesActivos >= this.alertThresholds.muchoLotes && prevLotesActivos < this.alertThresholds.muchoLotes) {
+                    this.addNotification('warning', 
+                        '⚠️ Muchos Lotes Activos', 
+                        `Tienes ${lotesActivos} lotes en progreso`, {
+                        lotesActivos: lotesActivos,
+                        recomendacion: 'Considerar enfocar en completar ventas'
+                    });
+                }
+
+                this.lastLotStates = new Map(currentLots);
+            }
+
+            extractLotsFromFIFOSystem(operations) {
+                const lotMap = new Map();
+                const ventas = operations.filter(op => op.operacion === 'Venta');
+                
+                ventas.forEach(venta => {
+                    if (venta.lote && venta.lote.trim()) {
+                        const lotId = venta.lote.trim();
+                        if (!lotMap.has(lotId)) {
+                            lotMap.set(lotId, {
+                                id: lotId,
+                                montoTotal: 0,
+                                montoVendido: 0,
+                                estado: 'activo',
+                                progreso: 0,
+                                comprasAsociadas: [],
+                                ventasAsociadas: []
+                            });
+                        }
+                        const lot = lotMap.get(lotId);
+                        lot.montoVendido += parseFloat(venta.montoUsdc) || 0;
+                        lot.ventasAsociadas.push(venta);
+                    }
+                });
+
+                const compras = operations.filter(op => op.operacion === 'Compra');
+                compras.forEach(compra => {
+                    if (compra.lote && compra.lote.trim()) {
+                        const loteTexto = compra.lote;
+                        const loteMatches = loteTexto.match(/([L]\d+)\(([^)]+)\)/g);
+                        if (loteMatches) {
+                            loteMatches.forEach(match => {
+                                const [, lotId, amount] = match.match(/([L]\d+)\(([^)]+)\)/);
+                                if (lotMap.has(lotId)) {
+                                    const lot = lotMap.get(lotId);
+                                    lot.montoTotal += parseFloat(amount) || 0;
+                                    lot.comprasAsociadas.push({
+                                        operacion: compra,
+                                        monto: parseFloat(amount) || 0
+                                    });
+                                }
+                            });
+                        }
+                    }
+                });
+
+                lotMap.forEach((lot) => {
+                    if (lot.montoTotal > 0) {
+                        lot.progreso = Math.min((lot.montoVendido / lot.montoTotal) * 100, 100);
+                        lot.estado = lot.progreso >= 99.9 ? 'cerrado' : 'activo';
+                    }
+                });
+
+                return lotMap;
+            }
+
+            calculateLotTotalGain(lotId, operations) {
+                const comprasDelLote = operations.filter(op => 
+                    op.operacion === 'Compra' && 
+                    op.lote && 
+                    op.lote.includes(lotId)
+                );
+
+                const gananciaVes = comprasDelLote.reduce((sum, op) => sum + (parseFloat(op.ves) || 0), 0);
+                const gananciaUsdc = comprasDelLote.reduce((sum, op) => sum + (parseFloat(op.usdc) || 0), 0);
+
+                return { ves: gananciaVes, usdc: gananciaUsdc };
+            }
+
+            analyzeBreach(operations) {
+                const compras = operations.filter(op => op.operacion === 'Compra');
+                const ventas = operations.filter(op => op.operacion === 'Venta');
+                if (compras.length === 0 || ventas.length === 0) return;
+
+                const promCompra = compras.reduce((sum, op) => sum + parseFloat(op.tasa), 0) / compras.length;
+                const promVenta = ventas.reduce((sum, op) => sum + parseFloat(op.tasa), 0) / ventas.length;
+                const brecha = ((promVenta - promCompra) / promCompra * 100);
+
+                const cambioBrecha = Math.abs(brecha - this.lastMetrics.brecha);
+                if (cambioBrecha > 1) {
+                    if (brecha < this.alertThresholds.brechaMin) {
+                        this.addNotification('warning', 'Brecha Baja Detectada', 
+                            `La brecha bajó a ${brecha.toFixed(2)}%`, {
+                            brecha: `${brecha.toFixed(2)}%`,
+                            promCompra: promCompra.toFixed(2),
+                            promVenta: promVenta.toFixed(2)
+                        });
+                    } else if (brecha > this.alertThresholds.brechaMax) {
+                        this.addNotification('success', 'Oportunidad: Brecha Alta', 
+                            `Excelente brecha de ${brecha.toFixed(2)}%`, {
+                            brecha: `${brecha.toFixed(2)}%`,
+                            promCompra: promCompra.toFixed(2),
+                            promVenta: promVenta.toFixed(2)
+                        });
+                    }
+                }
+
+                this.lastMetrics.brecha = brecha;
+            }
+
+            analyzeGainsSynchronized(operations) {
+                const compras = operations.filter(op => op.operacion === 'Compra');
+                const gananciasVes = compras.reduce((sum, op) => sum + (parseFloat(op.ves) || 0), 0);
+                const gananciasUsdc = compras.reduce((sum, op) => sum + (parseFloat(op.usdc) || 0), 0);
+
+                const cambioVes = Math.abs(gananciasVes - this.lastMetrics.ganancias.ves);
+                const cambioUsdc = Math.abs(gananciasUsdc - this.lastMetrics.ganancias.usdc);
+
+                if (cambioVes > 5 || cambioUsdc > 0.01) {
+                    this.addNotification('info', 
+                        '💰 Ganancias Actualizadas', 
+                        `Ganancias del día actualizadas`, {
+                        gananciaVes: `${gananciasVes.toFixed(2)} VES`,
+                        gananciaUsdc: `${gananciasUsdc.toFixed(4)} USDC`,
+                        cambio: `+${cambioVes.toFixed(2)} VES / +${cambioUsdc.toFixed(4)} USDC`
+                    });
+                }
+
+                this.lastMetrics.ganancias = { ves: gananciasVes, usdc: gananciasUsdc };
+            }
+
+            addNotification(type, title, content, metrics = null) {
+                const notificationKey = `${title}-${content}`;
+                const existingToday = this.notifications.find(n => 
+                    n.date === new Date().toISOString().split('T')[0] && 
+                    `${n.title}-${n.content}` === notificationKey
+                );
+
+                if (existingToday && Date.now() - new Date(existingToday.time).getTime() < 30000) {
+                    return;
+                }
+
+                const notification = {
+                    id: Date.now(),
+                    type: type,
+                    title: title,
+                    content: content,
+                    metrics: metrics,
+                    time: new Date(),
+                    date: new Date().toISOString().split('T')[0]
+                };
+
+                this.notifications.unshift(notification);
+                const today = notification.date;
+                const todayNotifications = this.notifications.filter(n => n.date === today);
+                if (todayNotifications.length > 15) {
+                    this.notifications = this.notifications.filter(n => 
+                        n.date !== today || todayNotifications.slice(0, 15).includes(n)
+                    );
+                }
+
+                this.renderNotifications();
+                this.saveNotifications();
+                this.updateBadge();
+                this.updateSystemStatus(type);
+            }
+
+            renderNotifications() {
+                const container = document.getElementById('aiNotifications');
+                const today = new Date().toISOString().split('T')[0];
+                const todayNotifications = this.notifications.filter(n => n.date === today);
+
+                if (todayNotifications.length === 0) {
+                    container.innerHTML = `
+                        <div class="notification info">
+                            <div class="notification-header">
+                                <div class="notification-title">
+                                    <span>📊</span>
+                                    Sin Alertas Nuevas
+                                </div>
+                                <div class="notification-time">Hoy</div>
+                            </div>
+                            <div class="notification-content">
+                                Sistema monitoreando activamente. Se te notificará de cambios importantes.
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = todayNotifications.map(notification => {
+                    const timeString = notification.time.toLocaleTimeString('es-ES', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    const iconMap = {
+                        info: '💡',
+                        success: '✅',
+                        warning: '⚠️',
+                        danger: '🚨'
+                    };
+
+                    return `
+                        <div class="notification ${notification.type}">
+                            <div class="notification-header">
+                                <div class="notification-title">
+                                    <span>${iconMap[notification.type]}</span>
+                                    ${notification.title}
+                                </div>
+                                <div class="notification-time">${timeString}</div>
+                            </div>
+                            <div class="notification-content">
+                                ${notification.content}
+                            </div>
+                            ${notification.metrics ? `
+                                <div class="notification-metrics">
+                                    ${Object.entries(notification.metrics)
+                                        .map(([key, value]) => `<div><strong>${key}:</strong> ${value}</div>`)
+                                        .join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            updateBadge() {
+                const badge = document.getElementById('aiNotificationBadge');
+                const today = new Date().toISOString().split('T')[0];
+                const todayCount = this.notifications.filter(n => n.date === today).length;
+
+                if (todayCount > 0 && !this.isOpen) {
+                    badge.style.display = 'flex';
+                    badge.textContent = Math.min(todayCount, 99);
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+
+            updateSystemStatus(alertType) {
+                const indicator = document.getElementById('statusIndicator');
+                const statusText = document.getElementById('statusText');
+                const toggleBtn = document.getElementById('aiToggleBtn');
+
+                toggleBtn.classList.remove('has-alerts', 'critical');
+                indicator.className = 'status-indicator';
+
+                if (alertType === 'danger') {
+                    indicator.classList.add('critical');
+                    statusText.textContent = 'Alerta Crítica - Requiere Atención';
+                    toggleBtn.classList.add('critical');
+                } else if (alertType === 'warning') {
+                    indicator.classList.add('warning');
+                    statusText.textContent = 'Advertencia Detectada';
+                    toggleBtn.classList.add('has-alerts');
+                } else {
+                    statusText.textContent = 'Sistema Activo - Monitoreando';
+                }
+            }
+
+            updateMetrics() {
+                try {
+                    if (typeof operations !== 'undefined' && typeof currentDate !== 'undefined') {
+                        const todayOps = operations.filter(op => op.fecha === currentDate);
+                        const compras = todayOps.filter(op => op.operacion === 'Compra');
+                        const ventas = todayOps.filter(op => op.operacion === 'Venta');
+
+                        let brecha = 0;
+                        if (compras.length > 0 && ventas.length > 0) {
+                            const promCompra = compras.reduce((sum, op) => sum + parseFloat(op.tasa), 0) / compras.length;
+                            const promVenta = ventas.reduce((sum, op) => sum + parseFloat(op.tasa), 0) / ventas.length;
+                            brecha = ((promVenta - promCompra) / promCompra * 100);
+                        }
+                        
+                        document.getElementById('currentGap').textContent = `${brecha.toFixed(2)}%`;
+                        
+                        const lotesActivos = Array.from(this.extractLotsFromFIFOSystem(todayOps).values())
+                            .filter(lote => lote.estado === 'activo').length;
+                        document.getElementById('activeLots').textContent = lotesActivos;
+                        
+                        const gananciasVes = compras.reduce((sum, op) => sum + (parseFloat(op.ves) || 0), 0);
+                        const gananciasUsdc = compras.reduce((sum, op) => sum + (parseFloat(op.usdc) || 0), 0);
+                        
+                        document.getElementById('dailyProfit').innerHTML = `
+                            <div>${gananciasVes.toFixed(2)} VES</div>
+                            <div>${gananciasUsdc.toFixed(2)} USDC</div>
+                        `;
+
+                        const totalVendido = ventas.reduce((sum, op) => sum + parseFloat(op.montoUsdc || 0), 0);
+                        const totalComprado = compras.reduce((sum, op) => sum + parseFloat(op.montoUsdc || 0), 0);
+                        const recompraPendiente = Math.max(0, totalVendido - totalComprado);
+                        
+                        document.getElementById('pendingRepurchase').textContent = 
+                            `${recompraPendiente.toFixed(2)} USDC`;
+
+                        const gapElement = document.getElementById('currentGap');
+                        gapElement.className = 'metric-value';
+                        
+                        if (brecha < this.alertThresholds.brechaMin) {
+                            gapElement.classList.add('negative');
+                        } else if (brecha > this.alertThresholds.brechaMax) {
+                            gapElement.classList.add('positive');
+                        } else {
+                            gapElement.classList.add('warning');
+                        }
+
+                        const repurchaseElement = document.getElementById('pendingRepurchase');
+                        repurchaseElement.className = 'metric-value';
+                        if (recompraPendiente > 0) {
+                            repurchaseElement.classList.add('warning');
+                        }
+                    }
+                } catch (error) {
+                    document.getElementById('currentGap').textContent = '0%';
+                    document.getElementById('activeLots').textContent = '0';
+                    document.getElementById('dailyProfit').innerHTML = '0 VES<br>0 USDC';
+                    document.getElementById('pendingRepurchase').textContent = '0 USDC';
+                }
+            }
+
+            clearNotificationBadge() {
+                if (this.isOpen) {
+                    document.getElementById('aiNotificationBadge').style.display = 'none';
+                }
+            }
+
+            saveNotifications() {
+                try {
+                    const today = new Date().toISOString().split('T')[0];
+                    const todayNotifications = this.notifications.filter(n => n.date === today);
+                    const dataToSave = {
+                        notifications: todayNotifications,
+                        processedOperations: Array.from(this.processedOperations),
+                        lastLotStates: Array.from(this.lastLotStates.entries())
+                    };
+                    window.aiStoredData = dataToSave;
+                } catch (error) {
+                    console.log('Guardando en memoria...');
+                }
+            }
+
+            loadNotifications() {
+                try {
+                    const stored = window.aiStoredData;
+                    if (stored) {
+                        const today = new Date().toISOString().split('T')[0];
+                        this.notifications = (stored.notifications || [])
+                            .filter(n => n.date === today)
+                            .map(n => ({
+                                ...n,
+                                time: new Date(n.time)
+                            }));
+                        this.processedOperations = new Set(stored.processedOperations || []);
+                        this.lastLotStates = new Map(stored.lastLotStates || []);
+                        this.renderNotifications();
+                        this.updateBadge();
+                    }
+                } catch (error) {
+                    console.log('Inicializando sistema...');
+                }
+            }
+
+            startMonitoring() {
+                setInterval(() => {
+                    this.analyzeCurrentState();
+                }, 5000);
+            }
+
+            analyzeCurrentState() {
+                try {
+                    if (typeof operations !== 'undefined' && typeof currentDate !== 'undefined') {
+                        this.analyzeOperations(operations, currentDate);
+                    }
+                } catch (error) {
+                    // Silencioso mientras espera inicialización
+                }
+            }
+
+            onOperationAdded(operation) {
+                this.lastOperationCount = Math.max(0, this.lastOperationCount - 1);
+                this.analyzeCurrentState();
+            }
+
+            onOperationEdited(operation) {
+                const operationPattern = `${operation.fecha}-${operation.usuario}`;
+                const keysToRemove = Array.from(this.processedOperations)
+                    .filter(key => key.includes(operationPattern));
+                keysToRemove.forEach(key => this.processedOperations.delete(key));
+                
+                this.addNotification('info', 'Operación Modificada', 
+                    `Se editó la operación de ${operation.usuario}`, {
+                    usuario: operation.usuario,
+                    referencia: operation.referencia || 'N/A'
+                });
+                
+                this.analyzeCurrentState();
+            }
+
+            onOperationsRecalculated() {
+                this.processedOperations.clear();
+                this.lastLotStates.clear();
+                this.lastOperationCount = 0;
+                this.analyzeCurrentState();
+            }
+
+            resetDaily() {
+                const today = new Date().toISOString().split('T')[0];
+                this.notifications = this.notifications.filter(n => n.date === today);
+                this.processedOperations.clear();
+                this.lastLotStates.clear();
+                this.lastOperationCount = 0;
+                this.renderNotifications();
+                this.updateBadge();
+            }
+        }
+
+        // Funciones de control del Centro de Operaciones IA
+        function clearNotifications() {
+            if (window.aiCenter) {
+                const today = new Date().toISOString().split('T')[0];
+                window.aiCenter.notifications = window.aiCenter.notifications.filter(n => n.date !== today);
+                window.aiCenter.renderNotifications();
+                window.aiCenter.updateBadge();
+                
+                if (window.aiStoredData) {
+                    window.aiStoredData.notifications = [];
+                }
+            }
+        }
+
+        function toggleAISettings() {
+            if (window.aiCenter) {
+                const config = {
+                    brechaMin: prompt('Brecha mínima (%)', window.aiCenter.alertThresholds.brechaMin),
+                    brechaMax: prompt('Brecha máxima (%)', window.aiCenter.alertThresholds.brechaMax),
+                    muchoLotes: prompt('Alerta muchos lotes', window.aiCenter.alertThresholds.muchoLotes)
+                };
+                
+                if (config.brechaMin !== null) window.aiCenter.alertThresholds.brechaMin = parseFloat(config.brechaMin) || 2;
+                if (config.brechaMax !== null) window.aiCenter.alertThresholds.brechaMax = parseFloat(config.brechaMax) || 4;
+                if (config.muchoLotes !== null) window.aiCenter.alertThresholds.muchoLotes = parseInt(config.muchoLotes) || 3;
+                
+                window.aiCenter.addNotification('info', 'Configuración Actualizada', 
+                    'Los parámetros de alerta han sido modificados');
+            }
+        }
+
+        // Inicializar el Centro de Operaciones IA
+        document.addEventListener('DOMContentLoaded', function() {
+            window.aiCenter = new AIOperationsCenter();
+            
+            // Limpiar datos antiguos al inicio de cada día
+            const today = new Date().toISOString().split('T')[0];
+            const lastDate = window.aiLastDate || '';
+            
+            if (lastDate && lastDate !== today) {
+                window.aiCenter.resetDaily();
+            }
+            
+            window.aiLastDate = today;
+        });
+
+        // Exponer funciones globales para integración
+        window.AIOperationsCenter = AIOperationsCenter;
+        
+        window.notifyAINewOperation = function(operation) {
+            if (window.aiCenter) {
+                window.aiCenter.onOperationAdded(operation);
+            }
+        };
+        
+        window.notifyAIEditOperation = function(operation) {
+            if (window.aiCenter) {
+                window.aiCenter.onOperationEdited(operation);
+            }
+        };
+
+        window.notifyAIRecalculation = function() {
+            if (window.aiCenter) {
+                window.aiCenter.onOperationsRecalculated();
+            }
+        };
+    </script>
+</body>
+</html>
