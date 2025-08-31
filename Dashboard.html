@@ -189,8 +189,8 @@
             background: linear-gradient(135deg, #9f7aea 0%, #667eea 100%);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 12px;
+            padding: 10px 15px; /* Ajustado para el header */
+            border-radius: 25px; /* Ajustado para el header */
             cursor: pointer;
             font-weight: 600;
             font-size: 14px;
@@ -199,11 +199,13 @@
             gap: 8px;
             box-shadow: var(--shadow);
             transition: all 0.3s ease;
+            backdrop-filter: blur(10px); /* Añadido para consistencia con theme-toggle */
         }
 
         .wally-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(159, 122, 234, 0.3);
+            background: linear-gradient(135deg, #a78bfa 0%, #7f64e3 100%); /* Ligeramente más oscuro al hover */
         }
 
         .back-btn {
@@ -404,19 +406,9 @@
             transition: all 0.3s ease;
         }
 
-        .edit-btn {
-            background: var(--info);
-            color: white;
-        }
-
         .edit-btn:hover {
             background: #3182ce;
             transform: translateY(-1px);
-        }
-
-        .delete-btn {
-            background: var(--danger);
-            color: white;
         }
 
         .delete-btn:hover {
@@ -886,8 +878,8 @@
             position: absolute;
             bottom: 70px;
             right: 0;
-            width: 380px;
-            max-height: 500px;
+            width: 450px; /* Aumentado el ancho para mejor visualización */
+            max-height: 600px; /* Aumentado la altura máxima */
             background: var(--bg-primary);
             border-radius: 20px;
             box-shadow: var(--shadow);
@@ -940,17 +932,33 @@
 
         #aiNotifications {
             flex: 1;
-            overflow-y: auto;
-            max-height: 300px;
+            overflow-y: auto; /* Asegura el scroll */
+            max-height: 350px; /* Ajustado para mostrar más notificaciones */
             padding: 10px;
+        }
+
+        .notification-section {
+            margin-bottom: 15px;
+        }
+
+        .notification-section h4 {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            padding: 5px 10px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .notification {
             background: var(--bg-primary);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 10px;
+            padding: 12px; /* Aumentado el padding */
+            margin-bottom: 10px; /* Aumentado el margin */
             position: relative;
             animation: slideIn 0.3s ease-out;
             transition: all 0.3s ease;
@@ -970,36 +978,38 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 8px;
+            margin-bottom: 8px; /* Aumentado el margin */
         }
 
         .notification-title {
             font-weight: 600;
-            font-size: 14px;
+            font-size: 14px; /* Aumentado el tamaño de fuente */
             color: var(--text-primary);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 8px; /* Aumentado el gap */
         }
 
         .notification-time {
-            font-size: 11px;
+            font-size: 11px; /* Aumentado el tamaño de fuente */
             color: #a0aec0;
         }
 
         .notification-content {
-            font-size: 13px;
+            font-size: 13px; /* Aumentado el tamaño de fuente */
             color: var(--text-primary);
-            line-height: 1.4;
+            line-height: 1.4; /* Aumentado el line-height */
         }
 
         .notification-metrics {
-            margin-top: 10px;
-            padding: 10px;
+            margin-top: 10px; /* Aumentado el margin */
+            padding: 10px; /* Aumentado el padding */
             background: rgba(102, 126, 234, 0.1);
             border-radius: 8px;
             font-family: 'Courier New', monospace;
-            font-size: 12px;
+            font-size: 12px; /* Aumentado el tamaño de fuente */
+            white-space: pre-wrap; /* Permite saltos de línea en el contenido */
+            word-break: break-word; /* Rompe palabras largas */
         }
 
         @keyframes slideIn {
@@ -1114,6 +1124,37 @@
         #aiNotifications::-webkit-scrollbar-thumb:hover {
             background: rgba(160, 174, 192, 0.5);
         }
+
+        /* Estilos para el buscador y filtros */
+        .filter-controls {
+            display: grid; /* Cambiado a grid */
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Columnas flexibles */
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap; /* Mantenido para compatibilidad en caso de que no quepan */
+            padding: 15px 30px;
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .filter-controls input[type="text"],
+        .filter-controls select {
+            padding: 10px 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+            min-width: unset; /* Eliminar min-width fijo */
+            width: 100%; /* Asegurar que ocupen el 100% de su celda en el grid */
+        }
+
+        .filter-controls input[type="text"]:focus,
+        .filter-controls select:focus {
+            outline: none;
+            border-color: var(--info);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
     </style>
 </head>
 <body data-theme="light">
@@ -1123,6 +1164,10 @@
             <div class="header">
                 <h1>Sistema de Seguimiento de Operaciones</h1>
                 <div class="header-controls">
+                    <!-- Botón Wally Tech movido aquí -->
+                    <button class="wally-btn" onclick="switchToWally()">
+                        🚀 Wally Tech
+                    </button>
                     <button class="theme-toggle" onclick="toggleTheme()">
                         <span id="themeIcon">🌙</span>
                         <span id="themeText">Modo Oscuro</span>
@@ -1139,9 +1184,6 @@
                     + Agregar Operación
                 </button>
                 <div class="divider"></div>
-                <button class="wally-btn" onclick="switchToWally()">
-                    🚀 Wally Tech
-                </button>
                 <select id="historySelector" onchange="loadHistoryDate()">
                     <option value="">Ver historial por fecha</option>
                 </select>
@@ -1172,6 +1214,30 @@
 
             <div class="table-header">
                 <h2>📋 Tabla de Operaciones</h2>
+            </div>
+
+            <!-- Buscador y Filtros -->
+            <div class="filter-controls">
+                <input type="text" id="searchOperations" placeholder="Buscar por usuario o referencia..." onkeyup="filterOperations()">
+                <select id="filterOperacion" onchange="filterOperations()">
+                    <option value="">Todas las Operaciones</option>
+                    <option value="Compra">Compra</option>
+                    <option value="Venta">Venta</option>
+                </select>
+                <select id="filterMetodoPago" onchange="filterOperations()">
+                    <option value="">Todos los Métodos</option>
+                    <option value="Pagomovil">Pagomovil</option>
+                    <option value="Banesco">Banesco</option>
+                    <option value="Venezuela">Venezuela</option>
+                    <option value="Bancamiga">Bancamiga</option>
+                    <option value="BNC">BNC</option>
+                </select>
+                <select id="filterEstatus" onchange="filterOperations()">
+                    <option value="">Todos los Estatus</option>
+                    <option value="En Curso">En Curso</option>
+                    <option value="En Disputa">En Disputa</option>
+                    <option value="Completado">Completado</option>
+                </select>
             </div>
 
             <div class="table-container">
@@ -1235,6 +1301,8 @@
                         <table>
                             <thead>
                                 <tr>
+                                    <th>USUARIO</th>
+                                    <th>REF</th>
                                     <th>RECIBO USDC</th>
                                     <th>TASA COMPRA</th>
                                     <th>ENVIO USD</th>
@@ -1254,6 +1322,8 @@
                         <table>
                             <thead>
                                 <tr>
+                                    <th>USUARIO</th>
+                                    <th>REF</th>
                                     <th>RECIBO USD</th>
                                     <th>TASA VENTA</th>
                                     <th>ENVIO USDC</th>
@@ -1436,6 +1506,14 @@
                         </div>
                         <div class="form-grid">
                             <div class="form-group">
+                                <label>Usuario:</label>
+                                <input type="text" id="wallyUsuario" placeholder="Nombre del usuario" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Referencia:</label>
+                                <input type="text" id="wallyReferencia" placeholder="Número de referencia" required>
+                            </div>
+                            <div class="form-group">
                                 <label>Tipo de Operación:</label>
                                 <select id="wallyOperacion" onchange="updateWallyFields()" required>
                                     <option value="">Seleccionar...</option>
@@ -1537,23 +1615,16 @@
                         <div class="metric-label">Recompra Pendiente</div>
                         <div class="metric-value" id="pendingRepurchase">0 USDC</div>
                     </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Reventa Pendiente</div>
+                        <div class="metric-value" id="pendingResale">0 USDC</div>
+                    </div>
                 </div>
             </div>
 
             <!-- Notificaciones -->
             <div id="aiNotifications">
-                <div class="notification info">
-                    <div class="notification-header">
-                        <div class="notification-title">
-                            <span>👋</span>
-                            Sistema Inicializado
-                        </div>
-                        <div class="notification-time">Ahora</div>
-                    </div>
-                    <div class="notification-content">
-                        IA activada y lista para monitorear tus operaciones. Te mantendré informado de todos los movimientos importantes.
-                    </div>
-                </div>
+                <!-- Las notificaciones se renderizarán aquí -->
             </div>
 
             <!-- Controles -->
@@ -1587,7 +1658,7 @@
             updateHistorySelector();
             updateWallyHistorySelector();
             loadTheme();
-            loadWallyValorInicial();
+            loadWallyValorInicial(); // Carga el valor inicial de Wally
         });
 
         // Funciones de navegación entre secciones
@@ -1595,12 +1666,16 @@
             document.getElementById('mainSection').classList.remove('active');
             document.getElementById('wallySection').classList.add('active');
             currentSection = 'wally';
+            // Al cambiar a Wally, asegúrate de cargar las operaciones de Wally para la fecha actual
+            loadWallyOperations(); 
         }
 
         function switchToMain() {
             document.getElementById('wallySection').classList.remove('active');
             document.getElementById('mainSection').classList.add('active');
             currentSection = 'main';
+            // Al cambiar a Main, asegúrate de cargar las operaciones principales para la fecha actual
+            loadOperations();
         }
 
         // Funciones de tema
@@ -1654,6 +1729,9 @@
                 input.classList.remove('disabled-field');
                 input.readOnly = false;
             });
+            // Asegurarse de que la sección de información adicional esté oculta al abrir el modal
+            document.getElementById("infoExtra").style.display = "none";
+            document.getElementById("infoIcon").textContent = "▼";
         }
 
         // Funciones del modal Wally
@@ -1759,8 +1837,8 @@
             const envioUsd = reciboUsdc * tasaCompra;
             document.getElementById('envioUsd').value = envioUsd.toFixed(2);
             
-            const gananciaUsdc = Math.abs(envioUsd - reciboUsdc);
-            document.getElementById('gananciaUsdc').value = gananciaUsdc.toFixed(4);
+            const gananciaUsdc = (reciboUsdc - envioUsd).toFixed(4); // Corregido: ganancia es la diferencia entre lo recibido y lo enviado
+            document.getElementById('gananciaUsdc').value = gananciaUsdc;
         }
 
         function calculateWallyVenta() {
@@ -1770,8 +1848,8 @@
             const envioUsdc = reciboUsd * tasaVenta;
             document.getElementById('envioUsdc').value = envioUsdc.toFixed(2);
             
-            const gananciaUsd = Math.abs(envioUsdc - reciboUsd);
-            document.getElementById('gananciaUsd').value = gananciaUsd.toFixed(4);
+            const gananciaUsd = (reciboUsd - envioUsdc).toFixed(4); // Corregido: ganancia es la diferencia entre lo recibido y lo enviado
+            document.getElementById('gananciaUsd').value = gananciaUsd;
         }
 
         // Funciones de guardado principal
@@ -1786,8 +1864,8 @@
                 montoBs: parseFloat(document.getElementById('montoBs').value),
                 comisionVes: parseFloat(document.getElementById('comisionVes').value) || 0,
                 total: parseFloat(document.getElementById('total').value),
-                ves: document.getElementById('ves').value,
-                usdc: document.getElementById('usdc').value,
+                ves: parseFloat(document.getElementById('ves').value) || 0, // Asegurar que sea número
+                usdc: parseFloat(document.getElementById('usdc').value) || 0, // Asegurar que sea número
                 lote: document.getElementById('lote').value,
                 estatus: document.getElementById('estatus').value,
                 fecha: currentDate,
@@ -1796,8 +1874,8 @@
 
             // Validación
             if (!operation.usuario || !operation.referencia || !operation.operacion || 
-                !operation.tasa || !operation.metodoPago || !operation.montoUsdc || !operation.estatus) {
-                alert('Por favor, complete todos los campos obligatorios');
+                isNaN(operation.tasa) || isNaN(operation.montoUsdc) || !operation.metodoPago || !operation.estatus) {
+                alert('Por favor, complete todos los campos obligatorios y asegúrese de que los valores numéricos sean válidos.');
                 return;
             }
 
@@ -1808,7 +1886,7 @@
             }
 
             saveOperations();
-            renderTable();
+            renderTable(); // Llama a renderTable para aplicar filtros y búsqueda
             updateSummary();
             closeModal();
             
@@ -1848,6 +1926,8 @@
         function saveWallyOperation() {
             const operacion = document.getElementById('wallyOperacion').value;
             let operation = {
+                usuario: document.getElementById('wallyUsuario').value, // Añadido
+                referencia: document.getElementById('wallyReferencia').value, // Añadido
                 operacion: operacion,
                 metodo: document.getElementById('wallyMetodo').value,
                 fecha: currentWallyDate,
@@ -1867,8 +1947,10 @@
             }
 
             // Validación
-            if (!operation.operacion || !operation.metodo) {
-                alert('Por favor, complete todos los campos obligatorios');
+            if (!operation.usuario || !operation.referencia || !operation.operacion || !operation.metodo || 
+                (operation.operacion === 'Compra' && (isNaN(operation.reciboUsdc) || isNaN(operation.tasaCompra))) ||
+                (operation.operacion === 'Venta' && (isNaN(operation.reciboUsd) || isNaN(operation.tasaVenta)))) {
+                alert('Por favor, complete todos los campos obligatorios y asegúrese de que los valores numéricos sean válidos.');
                 return;
             }
 
@@ -1889,7 +1971,23 @@
             const tbody = document.getElementById('operationsTable');
             const currentOps = operations.filter(op => op.fecha === currentDate);
             
-            tbody.innerHTML = currentOps.map((op, index) => {
+            // Aplicar filtros y búsqueda
+            const searchTerm = document.getElementById('searchOperations').value.toLowerCase();
+            const filterOperacion = document.getElementById('filterOperacion').value;
+            const filterMetodoPago = document.getElementById('filterMetodoPago').value;
+            const filterEstatus = document.getElementById('filterEstatus').value;
+
+            const filteredOps = currentOps.filter(op => {
+                const matchesSearch = op.usuario.toLowerCase().includes(searchTerm) || 
+                                      op.referencia.toLowerCase().includes(searchTerm);
+                const matchesOperacion = filterOperacion === '' || op.operacion === filterOperacion;
+                const matchesMetodoPago = filterMetodoPago === '' || op.metodoPago === filterMetodoPago;
+                const matchesEstatus = filterEstatus === '' || op.estatus === filterEstatus;
+
+                return matchesSearch && matchesOperacion && matchesMetodoPago && matchesEstatus;
+            });
+
+            tbody.innerHTML = filteredOps.map((op, index) => {
                 const globalIndex = operations.indexOf(op);
                 return `
                     <tr class="${op.operacion.toLowerCase()}">
@@ -1902,8 +2000,8 @@
                         <td>${op.montoBs.toFixed(2)}</td>
                         <td>${op.comisionVes.toFixed(2)}</td>
                         <td>${op.total.toFixed(2)}</td>
-                        <td>${op.ves}</td>
-                        <td>${op.usdc}</td>
+                        <td>${(op.ves || 0).toFixed(2)}</td>
+                        <td>${(op.usdc || 0).toFixed(6)}</td>
                         <td>
                             <div class="lote-scroll">${op.lote || ''}</div>
                         </td>
@@ -1917,6 +2015,11 @@
             }).join('');
         }
 
+        // Función para aplicar filtros y búsqueda
+        function filterOperations() {
+            renderTable();
+        }
+
         // Funciones de renderizado Wally
         function renderWallyTables() {
             const currentOps = wallyOperations.filter(op => op.fecha === currentWallyDate);
@@ -1928,6 +2031,8 @@
                 const globalIndex = wallyOperations.indexOf(op);
                 return `
                     <tr>
+                        <td>${op.usuario || ''}</td>
+                        <td>${op.referencia || ''}</td>
                         <td>${(Number(op.reciboUsdc) || 0).toFixed(2)}</td>
                         <td>${(Number(op.tasaCompra) || 0).toFixed(3)}</td>
                         <td>${(Number(op.envioUsd) || 0).toFixed(2)}</td>
@@ -1945,6 +2050,8 @@
                 const globalIndex = wallyOperations.indexOf(op);
                 return `
                     <tr>
+                        <td>${op.usuario || ''}</td>
+                        <td>${op.referencia || ''}</td>
                         <td>${(Number(op.reciboUsd) || 0).toFixed(2)}</td>
                         <td>${(Number(op.tasaVenta) || 0).toFixed(3)}</td>
                         <td>${(Number(op.envioUsdc) || 0).toFixed(2)}</td>
@@ -1965,6 +2072,8 @@
             const op = wallyOperations[index];
 
             document.getElementById('wallyModalTitle').textContent = 'Editar Operación Wally Tech';
+            document.getElementById('wallyUsuario').value = op.usuario || ''; // Añadido
+            document.getElementById('wallyReferencia').value = op.referencia || ''; // Añadido
             document.getElementById('wallyOperacion').value = op.operacion || '';
             document.getElementById('wallyMetodo').value = op.metodo || '';
             updateWallyFields();
@@ -2040,7 +2149,7 @@
                 sale.op._assignedLots = sale.op._assignedLots || [];
                 sale.op._gainVes = sale.op._gainVes || 0;
                 sale.op._gainUsdc = sale.op._gainUsdc || 0;
-                sale.op.lote = lotId;
+                sale.op.lote = lotId; // Asigna el lote a la operación de venta
 
                 while (remainingToMatch > 0 && purchaseQueue.length > 0) {
                     const head = purchaseQueue[0];
@@ -2051,12 +2160,13 @@
                     const commissionPortion = sale.comisionVes * (consume / (sale.montoUsdc || 1));
 
                     const gainVes = revenueVes - costVes - commissionPortion;
-                    const divisor = head.tasa || sale.tasa || 1;
+                    const divisor = head.tasa || sale.tasa || 1; // Usar la tasa de compra para calcular ganancia en USDC
                     const gainUsdc = gainVes / divisor;
 
                     sale.op._gainVes += gainVes;
                     sale.op._gainUsdc += gainUsdc;
 
+                    // Actualizar la operación de compra con la ganancia y el lote asignado
                     head.op._gainVes = (head.op._gainVes || 0) + gainVes;
                     head.op._gainUsdc = (head.op._gainUsdc || 0) + gainUsdc;
                     head.op._assignedLots = head.op._assignedLots || [];
@@ -2071,12 +2181,13 @@
                     }
                 }
 
+                // Si aún queda monto por emparejar en la venta (ej. si no hay compras suficientes)
                 if (remainingToMatch > 0) {
                     const revenueVes = remainingToMatch * (sale.tasa || 0);
                     const commissionPortion = sale.comisionVes * (remainingToMatch / (sale.montoUsdc || 1));
                     const gainVes = revenueVes - commissionPortion;
-                    const gainUsdc = gainVes / (sale.tasa || 1);
-
+                    const gainUsdc = gainVes / (sale.tasa || 1); // Usar la tasa de venta para calcular ganancia en USDC
+                    
                     sale.op._gainVes += gainVes;
                     sale.op._gainUsdc += gainUsdc;
                     remainingToMatch = 0;
@@ -2090,17 +2201,25 @@
 
                 if (o.operacion === 'Compra') {
                     if (o._assignedLots && o._assignedLots.length > 0) {
+                        // Formato: L1(10.00),L2(5.00)
                         o.lote = o._assignedLots.map(a => `${a.lot}(${Number(a.amount).toFixed(2)})`).join(',');
+                    } else {
+                        o.lote = ''; // Si no se asignó a ningún lote, el campo lote queda vacío
                     }
                 }
 
+                // Limpiar propiedades temporales
                 delete o._assignedLots;
                 delete o._remainingUsdc;
                 delete o._gainVes;
                 delete o._gainUsdc;
             });
 
-            saveOperations();
+            // Notificar al IA que las operaciones han sido recalculadas
+            if (window.aiCenter) {
+                window.notifyAIRecalculation();
+            }
+            saveOperations(); // Guardar las operaciones actualizadas con los lotes y ganancias
         }
 
         // Actualizar resumen
@@ -2121,7 +2240,7 @@
             document.getElementById('promVenta').textContent = promVenta.toFixed(2);
             document.getElementById('brecha').textContent = brecha.toFixed(2) + '%';
             
-            applyFIFOForDate(currentDate);
+            applyFIFOForDate(currentDate); // Asegura que los campos ves/usdc y lote estén actualizados
 
             const gananciasVesSoloCompras = currentOps
                 .filter(op => op.operacion === 'Compra')
@@ -2146,12 +2265,19 @@
             const ventas = currentOps.filter(op => op.operacion === 'Venta');
 
             const totalEnvioUsd_fromCompras = compras.reduce((s, op) => s + (Number(op.envioUsd) || 0), 0);
-            const totalEnvioUsdc_fromVentas = ventas.reduce((s, op) => s + (Number(op.envioUsdc) || 0), 0);
+            const totalReciboUsdc_fromCompras = compras.reduce((s, op) => s + (Number(op.reciboUsdc) || 0), 0);
 
-            const iniValue = parseFloat(localStorage.getItem("wallyValorInicial")) || 0;
-            const valAct = iniValue - totalEnvioUsd_fromCompras + totalEnvioUsdc_fromVentas;
+            const totalEnvioUsdc_fromVentas = ventas.reduce((s, op) => s + (Number(op.envioUsdc) || 0), 0);
+            const totalReciboUsd_fromVentas = ventas.reduce((s, op) => s + (Number(op.reciboUsd) || 0), 0);
+
+            // El valor actual de Wally es el valor inicial + (recibos - envíos)
+            const iniValue = parseFloat(localStorage.getItem(`wallyValorInicial_${currentWallyDate}`)) || 0;
+            const valAct = iniValue + totalReciboUsdc_fromCompras + totalReciboUsd_fromVentas - totalEnvioUsd_fromCompras - totalEnvioUsdc_fromVentas;
 
             document.getElementById("wallyValorActual").textContent = `${valAct.toFixed(2)}`;
+            
+            // Guardar el valor actual para el día actual, para que sea el inicial del siguiente día
+            localStorage.setItem(`wallyValorActual_${currentWallyDate}`, valAct.toFixed(2));
 
             const totalGananciaUsdc = compras.reduce((s, op) => s + (Number(op.gananciaUsdc) || 0), 0);
             const totalGananciaUsd = ventas.reduce((s, op) => s + (Number(op.gananciaUsd) || 0), 0);
@@ -2209,10 +2335,42 @@
         }
 
         function loadWallyOperations() {
+            const prevWallyDate = currentWallyDate; // Guarda la fecha anterior
             currentWallyDate = document.getElementById('wallySelectedDate').value;
             wallyOperations = JSON.parse(localStorage.getItem('wallyOperations') || '[]');
+            
+            // Lógica para el saldo inicial diario
+            const wallyValorInicialInput = document.getElementById('wallyValorInicialInput');
+            const savedInitialForToday = localStorage.getItem(`wallyValorInicial_${currentWallyDate}`);
+            
+            if (savedInitialForToday) {
+                wallyValorInicialInput.value = savedInitialForToday;
+                wallyValorInicialInput.readOnly = true;
+                document.getElementById('editWallyIniBtn').style.display = 'inline';
+            } else {
+                // Si no hay un valor inicial guardado para hoy, intenta cargar el valor actual del día anterior
+                const prevDayActualValue = localStorage.getItem(`wallyValorActual_${getPreviousDate(currentWallyDate)}`);
+                if (prevDayActualValue) {
+                    wallyValorInicialInput.value = prevDayActualValue;
+                    localStorage.setItem(`wallyValorInicial_${currentWallyDate}`, prevDayActualValue); // Guarda como inicial para hoy
+                    wallyValorInicialInput.readOnly = true;
+                    document.getElementById('editWallyIniBtn').style.display = 'inline';
+                } else {
+                    wallyValorInicialInput.value = '0.00'; // Si no hay nada, por defecto 0
+                    wallyValorInicialInput.readOnly = false;
+                    document.getElementById('editWallyIniBtn').style.display = 'none';
+                }
+            }
+
             renderWallyTables();
             updateWallySummary();
+        }
+
+        // Helper para obtener la fecha anterior
+        function getPreviousDate(dateString) {
+            const date = new Date(dateString);
+            date.setDate(date.getDate() - 1);
+            return date.toISOString().split('T')[0];
         }
 
         function updateHistorySelector() {
@@ -2292,8 +2450,8 @@
             const editBtn = document.getElementById("editWallyIniBtn");
             const value = parseFloat(input.value) || 0;
 
-            if (value > 0) {
-                localStorage.setItem("wallyValorInicial", value.toFixed(2));
+            if (value >= 0) { // Permitir 0 como valor inicial
+                localStorage.setItem(`wallyValorInicial_${currentWallyDate}`, value.toFixed(2));
                 input.value = value.toFixed(2);
                 input.readOnly = true;
                 editBtn.style.display = "inline";
@@ -2312,18 +2470,39 @@
         function loadWallyValorInicial() {
             const input = document.getElementById("wallyValorInicialInput");
             const editBtn = document.getElementById("editWallyIniBtn");
-            const saved = localStorage.getItem("wallyValorInicial");
+            const saved = localStorage.getItem(`wallyValorInicial_${currentWallyDate}`);
             if (saved) {
                 input.value = saved;
                 input.readOnly = true;
                 editBtn.style.display = "inline";
+            } else {
+                // Si no hay un valor inicial guardado para hoy, intenta cargar el valor actual del día anterior
+                const prevDayActualValue = localStorage.getItem(`wallyValorActual_${getWallyPreviousDate(currentWallyDate)}`);
+                if (prevDayActualValue) {
+                    input.value = prevDayActualValue;
+                    localStorage.setItem(`wallyValorInicial_${currentWallyDate}`, prevDayActualValue); // Guarda como inicial para hoy
+                    input.readOnly = true;
+                    editBtn.style.display = "inline";
+                } else {
+                    input.value = '0.00'; // Si no hay nada, por defecto 0
+                    input.readOnly = false;
+                    editBtn.style.display = "none";
+                }
             }
+        }
+
+        // Helper para obtener la fecha anterior para Wally
+        function getWallyPreviousDate(dateString) {
+            const date = new Date(dateString);
+            date.setDate(date.getDate() - 1);
+            return date.toISOString().split('T')[0];
         }
 
         // ===== SISTEMA DE INTELIGENCIA ARTIFICIAL =====
         class AIOperationsCenter {
             constructor() {
-                this.notifications = [];
+                this.notifications = []; // All notifications
+                this.alerts = []; // Critical alerts
                 this.isOpen = false;
                 this.processedOperations = new Set();
                 this.lastOperationCount = 0;
@@ -2336,7 +2515,9 @@
                 this.alertThresholds = {
                     brechaMin: 2,
                     brechaMax: 4,
-                    muchoLotes: 3
+                    muchoLotes: 3,
+                    recompraCritica: 100, // Umbral para recompra crítica
+                    reventaCritica: 100 // Umbral para reventa crítica
                 };
                 this.init();
             }
@@ -2364,6 +2545,7 @@
                 this.isOpen = true;
                 this.clearNotificationBadge();
                 this.updateMetrics();
+                this.renderNotifications(); // Re-render to ensure correct display
             }
 
             close() {
@@ -2371,21 +2553,28 @@
                 this.isOpen = false;
             }
 
-            analyzeOperations(operations, currentDate) {
-                if (!operations || operations.length === 0) return;
-                const todayOps = operations.filter(op => op.fecha === currentDate);
-                if (todayOps.length === this.lastOperationCount) return;
-                const newOperations = todayOps.slice(this.lastOperationCount);
-                
-                newOperations.forEach(op => {
-                    this.processNewOperation(op);
-                });
-
-                this.analyzeLotChangesWithFIFO(todayOps);
-                this.analyzeBreach(todayOps);
-                this.analyzeGainsSynchronized(todayOps);
-                this.lastOperationCount = todayOps.length;
-                this.updateMetrics();
+            analyzeCurrentState() {
+                if (typeof operations !== 'undefined' && typeof currentDate !== 'undefined') {
+                    const todayOps = operations.filter(op => op.fecha === currentDate);
+                    
+                    // Procesar nuevas operaciones
+                    if (todayOps.length > this.lastOperationCount) {
+                        const newOperations = todayOps.slice(this.lastOperationCount);
+                        newOperations.forEach(op => {
+                            this.processNewOperation(op);
+                        });
+                    }
+                    
+                    this.analyzeLotChangesWithFIFO(todayOps);
+                    this.analyzeBreach(todayOps);
+                    this.analyzeGainsSynchronized(todayOps);
+                    this.analyzePendingBalances(todayOps);
+                    this.lastOperationCount = todayOps.length;
+                    this.updateMetrics();
+                } else {
+                    // Si no hay operaciones o currentDate no está definido, resetear métricas
+                    this.updateMetrics(); 
+                }
             }
 
             processNewOperation(operation) {
@@ -2477,53 +2666,57 @@
 
             extractLotsFromFIFOSystem(operations) {
                 const lotMap = new Map();
-                const ventas = operations.filter(op => op.operacion === 'Venta');
                 
-                ventas.forEach(venta => {
-                    if (venta.lote && venta.lote.trim()) {
-                        const lotId = venta.lote.trim();
-                        if (!lotMap.has(lotId)) {
-                            lotMap.set(lotId, {
-                                id: lotId,
-                                montoTotal: 0,
-                                montoVendido: 0,
-                                estado: 'activo',
-                                progreso: 0,
-                                comprasAsociadas: [],
-                                ventasAsociadas: []
-                            });
-                        }
-                        const lot = lotMap.get(lotId);
-                        lot.montoVendido += parseFloat(venta.montoUsdc) || 0;
-                        lot.ventasAsociadas.push(venta);
+                // Primero, identificar todas las ventas y sus lotes
+                operations.filter(op => op.operacion === 'Venta' && op.lote && op.lote.trim()).forEach(venta => {
+                    const lotId = venta.lote.trim();
+                    if (!lotMap.has(lotId)) {
+                        lotMap.set(lotId, {
+                            id: lotId,
+                            montoTotal: 0, // Suma de USDC de compras asignadas a este lote
+                            montoVendido: 0, // Suma de USDC de ventas asignadas a este lote
+                            estado: 'activo',
+                            progreso: 0,
+                            comprasAsociadas: [],
+                            ventasAsociadas: []
+                        });
+                    }
+                    const lot = lotMap.get(lotId);
+                    lot.montoVendido += parseFloat(venta.montoUsdc) || 0;
+                    lot.ventasAsociadas.push(venta);
+                });
+
+                // Luego, asignar las compras a los lotes existentes
+                operations.filter(op => op.operacion === 'Compra' && op.lote && op.lote.trim()).forEach(compra => {
+                    const loteTexto = compra.lote;
+                    const loteMatches = loteTexto.match(/([L]\d+)\(([^)]+)\)/g);
+                    if (loteMatches) {
+                        loteMatches.forEach(match => {
+                            const [, lotId, amount] = match.match(/([L]\d+)\(([^)]+)\)/);
+                            if (lotMap.has(lotId)) {
+                                const lot = lotMap.get(lotId);
+                                lot.montoTotal += parseFloat(amount) || 0;
+                                lot.comprasAsociadas.push({
+                                    operacion: compra,
+                                    monto: parseFloat(amount) || 0
+                                });
+                            }
+                        });
                     }
                 });
 
-                const compras = operations.filter(op => op.operacion === 'Compra');
-                compras.forEach(compra => {
-                    if (compra.lote && compra.lote.trim()) {
-                        const loteTexto = compra.lote;
-                        const loteMatches = loteTexto.match(/([L]\d+)\(([^)]+)\)/g);
-                        if (loteMatches) {
-                            loteMatches.forEach(match => {
-                                const [, lotId, amount] = match.match(/([L]\d+)\(([^)]+)\)/);
-                                if (lotMap.has(lotId)) {
-                                    const lot = lotMap.get(lotId);
-                                    lot.montoTotal += parseFloat(amount) || 0;
-                                    lot.comprasAsociadas.push({
-                                        operacion: compra,
-                                        monto: parseFloat(amount) || 0
-                                    });
-                                }
-                            });
-                        }
-                    }
-                });
-
+                // Calcular progreso y estado final
                 lotMap.forEach((lot) => {
                     if (lot.montoTotal > 0) {
                         lot.progreso = Math.min((lot.montoVendido / lot.montoTotal) * 100, 100);
                         lot.estado = lot.progreso >= 99.9 ? 'cerrado' : 'activo';
+                    } else if (lot.montoVendido > 0) {
+                        // Caso donde hay ventas pero no compras asignadas (lote "abierto" sin origen claro)
+                        lot.estado = 'activo';
+                        lot.progreso = 0; // O algún otro valor que indique que no hay compras para medir progreso
+                    } else {
+                        lot.estado = 'inactivo'; // Lote sin compras ni ventas
+                        lot.progreso = 0;
                     }
                 });
 
@@ -2531,6 +2724,7 @@
             }
 
             calculateLotTotalGain(lotId, operations) {
+                // Sumar las ganancias de las operaciones de compra que tienen este lote asignado
                 const comprasDelLote = operations.filter(op => 
                     op.operacion === 'Compra' && 
                     op.lote && 
@@ -2553,17 +2747,17 @@
                 const brecha = ((promVenta - promCompra) / promCompra * 100);
 
                 const cambioBrecha = Math.abs(brecha - this.lastMetrics.brecha);
-                if (cambioBrecha > 1) {
+                if (cambioBrecha > 1) { // Solo notificar si hay un cambio significativo
                     if (brecha < this.alertThresholds.brechaMin) {
-                        this.addNotification('warning', 'Brecha Baja Detectada', 
-                            `La brecha bajó a ${brecha.toFixed(2)}%`, {
+                        this.addAlert('warning', 'Brecha Baja Detectada', 
+                            `La brecha bajó a ${brecha.toFixed(2)}%. Considera ajustar tasas.`, {
                             brecha: `${brecha.toFixed(2)}%`,
                             promCompra: promCompra.toFixed(2),
                             promVenta: promVenta.toFixed(2)
                         });
                     } else if (brecha > this.alertThresholds.brechaMax) {
-                        this.addNotification('success', 'Oportunidad: Brecha Alta', 
-                            `Excelente brecha de ${brecha.toFixed(2)}%`, {
+                        this.addAlert('success', 'Oportunidad: Brecha Alta', 
+                            `Excelente brecha de ${brecha.toFixed(2)}%. ¡Buen momento para operar!`, {
                             brecha: `${brecha.toFixed(2)}%`,
                             promCompra: promCompra.toFixed(2),
                             promVenta: promVenta.toFixed(2)
@@ -2582,7 +2776,7 @@
                 const cambioVes = Math.abs(gananciasVes - this.lastMetrics.ganancias.ves);
                 const cambioUsdc = Math.abs(gananciasUsdc - this.lastMetrics.ganancias.usdc);
 
-                if (cambioVes > 5 || cambioUsdc > 0.01) {
+                if (cambioVes > 5 || cambioUsdc > 0.01) { // Notificar si hay un cambio significativo en las ganancias
                     this.addNotification('info', 
                         '💰 Ganancias Actualizadas', 
                         `Ganancias del día actualizadas`, {
@@ -2595,6 +2789,53 @@
                 this.lastMetrics.ganancias = { ves: gananciasVes, usdc: gananciasUsdc };
             }
 
+            analyzePendingBalances(operations) {
+                const compras = operations.filter(op => op.operacion === 'Compra');
+                const ventas = operations.filter(op => op.operacion === 'Venta');
+
+                const totalComprado = compras.reduce((sum, op) => sum + parseFloat(op.montoUsdc || 0), 0);
+                const totalVendido = ventas.reduce((sum, op) => sum + parseFloat(op.montoUsdc || 0), 0);
+
+                const recompraPendiente = Math.max(0, totalVendido - totalComprado);
+                const reventaPendiente = Math.max(0, totalComprado - totalVendido);
+
+                // Notificación para recompra pendiente
+                if (recompraPendiente > this.alertThresholds.recompraCritica && 
+                    !this.processedOperations.has(`recompra_critica_${currentDate}`)) {
+                    this.addAlert('danger', '🚨 Recompra Crítica', 
+                        `Necesitas recomprar ${recompraPendiente.toFixed(2)} USDC para equilibrar tus ventas.`, {
+                        monto: `${recompraPendiente.toFixed(2)} USDC`,
+                        tipo: 'Recompra'
+                    });
+                    this.processedOperations.add(`recompra_critica_${currentDate}`);
+                } else if (recompraPendiente === 0 && this.processedOperations.has(`recompra_critica_${currentDate}`)) {
+                    this.addAlert('success', '✅ Recompra Equilibrada', 
+                        'Ya no hay recompra pendiente. Tus operaciones están equilibradas.', {
+                        monto: '0 USDC',
+                        tipo: 'Recompra'
+                    });
+                    this.processedOperations.delete(`recompra_critica_${currentDate}`);
+                }
+
+                // Notificación para reventa pendiente
+                if (reventaPendiente > this.alertThresholds.reventaCritica && 
+                    !this.processedOperations.has(`reventa_critica_${currentDate}`)) {
+                    this.addAlert('warning', '⚠️ Reventa Pendiente', 
+                        `Tienes ${reventaPendiente.toFixed(2)} USDC comprados sin vender. Considera revender.`, {
+                        monto: `${reventaPendiente.toFixed(2)} USDC`,
+                        tipo: 'Reventa'
+                    });
+                    this.processedOperations.add(`reventa_critica_${currentDate}`);
+                } else if (reventaPendiente === 0 && this.processedOperations.has(`reventa_critica_${currentDate}`)) {
+                    this.addAlert('success', '✅ Reventa Equilibrada', 
+                        'Ya no hay reventa pendiente. Tus operaciones están equilibradas.', {
+                        monto: '0 USDC',
+                        tipo: 'Reventa'
+                    });
+                    this.processedOperations.delete(`reventa_critica_${currentDate}`);
+                }
+            }
+
             addNotification(type, title, content, metrics = null) {
                 const notificationKey = `${title}-${content}`;
                 const existingToday = this.notifications.find(n => 
@@ -2602,6 +2843,7 @@
                     `${n.title}-${n.content}` === notificationKey
                 );
 
+                // Evitar duplicados en un corto periodo de tiempo (30 segundos)
                 if (existingToday && Date.now() - new Date(existingToday.time).getTime() < 30000) {
                     return;
                 }
@@ -2619,9 +2861,11 @@
                 this.notifications.unshift(notification);
                 const today = notification.date;
                 const todayNotifications = this.notifications.filter(n => n.date === today);
-                if (todayNotifications.length > 15) {
+                
+                // Limitar el número de notificaciones por día para evitar sobrecarga visual
+                if (todayNotifications.length > 20) { // Aumentado el límite a 20
                     this.notifications = this.notifications.filter(n => 
-                        n.date !== today || todayNotifications.slice(0, 15).includes(n)
+                        n.date !== today || todayNotifications.slice(0, 20).includes(n)
                     );
                 }
 
@@ -2631,13 +2875,122 @@
                 this.updateSystemStatus(type);
             }
 
+            addAlert(type, title, content, metrics = null) {
+                const alertKey = `${title}-${content}`;
+                const existingToday = this.alerts.find(a => 
+                    a.date === new Date().toISOString().split('T')[0] && 
+                    `${a.title}-${a.content}` === alertKey
+                );
+
+                // Evitar duplicados en un corto periodo de tiempo (30 segundos)
+                if (existingToday && Date.now() - new Date(existingToday.time).getTime() < 30000) {
+                    return;
+                }
+
+                const alert = {
+                    id: Date.now(),
+                    type: type,
+                    title: title,
+                    content: content,
+                    metrics: metrics,
+                    time: new Date(),
+                    date: new Date().toISOString().split('T')[0]
+                };
+
+                this.alerts.unshift(alert);
+                const today = alert.date;
+                const todayAlerts = this.alerts.filter(a => a.date === today);
+                
+                // Limitar el número de alertas por día
+                if (todayAlerts.length > 10) { 
+                    this.alerts = this.alerts.filter(a => 
+                        a.date !== today || todayAlerts.slice(0, 10).includes(a)
+                    );
+                }
+
+                this.renderNotifications();
+                this.saveNotifications();
+                this.updateBadge();
+                this.updateSystemStatus(type); // Update status based on the most critical alert
+            }
+
             renderNotifications() {
                 const container = document.getElementById('aiNotifications');
                 const today = new Date().toISOString().split('T')[0];
+                const todayAlerts = this.alerts.filter(n => n.date === today);
                 const todayNotifications = this.notifications.filter(n => n.date === today);
 
-                if (todayNotifications.length === 0) {
-                    container.innerHTML = `
+                let htmlContent = '';
+
+                const iconMap = {
+                    info: '💡',
+                    success: '✅',
+                    warning: '⚠️',
+                    danger: '🚨'
+                };
+
+                // Render Alerts
+                if (todayAlerts.length > 0) {
+                    htmlContent += `
+                        <div class="notification-section">
+                            <h4>${iconMap['danger']} Alertas Críticas</h4>
+                            ${todayAlerts.map(alert => `
+                                <div class="notification ${alert.type}">
+                                    <div class="notification-header">
+                                        <div class="notification-title">
+                                            <span>${iconMap[alert.type]}</span>
+                                            ${alert.title}
+                                        </div>
+                                        <div class="notification-time">${alert.time.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</div>
+                                    </div>
+                                    <div class="notification-content">
+                                        ${alert.content}
+                                    </div>
+                                    ${alert.metrics ? `
+                                        <div class="notification-metrics">
+                                            ${Object.entries(alert.metrics)
+                                                .map(([key, value]) => `<div><strong>${key}:</strong> ${value}</div>`)
+                                                .join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                // Render General Notifications
+                if (todayNotifications.length > 0) {
+                    htmlContent += `
+                        <div class="notification-section">
+                            <h4>${iconMap['info']} Notificaciones Generales</h4>
+                            ${todayNotifications.map(notification => `
+                                <div class="notification ${notification.type}">
+                                    <div class="notification-header">
+                                        <div class="notification-title">
+                                            <span>${iconMap[notification.type]}</span>
+                                            ${notification.title}
+                                        </div>
+                                        <div class="notification-time">${notification.time.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</div>
+                                    </div>
+                                    <div class="notification-content">
+                                        ${notification.content}
+                                    </div>
+                                    ${notification.metrics ? `
+                                        <div class="notification-metrics">
+                                            ${Object.entries(notification.metrics)
+                                                .map(([key, value]) => `<div><strong>${key}:</strong> ${value}</div>`)
+                                                .join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                if (todayAlerts.length === 0 && todayNotifications.length === 0) {
+                    htmlContent = `
                         <div class="notification info">
                             <div class="notification-header">
                                 <div class="notification-title">
@@ -2651,50 +3004,15 @@
                             </div>
                         </div>
                     `;
-                    return;
                 }
 
-                container.innerHTML = todayNotifications.map(notification => {
-                    const timeString = notification.time.toLocaleTimeString('es-ES', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-
-                    const iconMap = {
-                        info: '💡',
-                        success: '✅',
-                        warning: '⚠️',
-                        danger: '🚨'
-                    };
-
-                    return `
-                        <div class="notification ${notification.type}">
-                            <div class="notification-header">
-                                <div class="notification-title">
-                                    <span>${iconMap[notification.type]}</span>
-                                    ${notification.title}
-                                </div>
-                                <div class="notification-time">${timeString}</div>
-                            </div>
-                            <div class="notification-content">
-                                ${notification.content}
-                            </div>
-                            ${notification.metrics ? `
-                                <div class="notification-metrics">
-                                    ${Object.entries(notification.metrics)
-                                        .map(([key, value]) => `<div><strong>${key}:</strong> ${value}</div>`)
-                                        .join('')}
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
-                }).join('');
+                container.innerHTML = htmlContent;
             }
 
             updateBadge() {
                 const badge = document.getElementById('aiNotificationBadge');
                 const today = new Date().toISOString().split('T')[0];
-                const todayCount = this.notifications.filter(n => n.date === today).length;
+                const todayCount = this.alerts.filter(n => n.date === today).length + this.notifications.filter(n => n.date === today).length;
 
                 if (todayCount > 0 && !this.isOpen) {
                     badge.style.display = 'flex';
@@ -2712,11 +3030,16 @@
                 toggleBtn.classList.remove('has-alerts', 'critical');
                 indicator.className = 'status-indicator';
 
-                if (alertType === 'danger') {
+                // Determine the most critical alert type currently active
+                const currentCriticality = this.alerts.some(a => a.type === 'danger') ? 'danger' :
+                                           this.alerts.some(a => a.type === 'warning') ? 'warning' :
+                                           'info'; // Default if no alerts
+
+                if (currentCriticality === 'danger') {
                     indicator.classList.add('critical');
                     statusText.textContent = 'Alerta Crítica - Requiere Atención';
                     toggleBtn.classList.add('critical');
-                } else if (alertType === 'warning') {
+                } else if (currentCriticality === 'warning') {
                     indicator.classList.add('warning');
                     statusText.textContent = 'Advertencia Detectada';
                     toggleBtn.classList.add('has-alerts');
@@ -2753,12 +3076,16 @@
                             <div>${gananciasUsdc.toFixed(2)} USDC</div>
                         `;
 
-                        const totalVendido = ventas.reduce((sum, op) => sum + parseFloat(op.montoUsdc || 0), 0);
                         const totalComprado = compras.reduce((sum, op) => sum + parseFloat(op.montoUsdc || 0), 0);
+                        const totalVendido = ventas.reduce((sum, op) => sum + parseFloat(op.montoUsdc || 0), 0);
+                        
                         const recompraPendiente = Math.max(0, totalVendido - totalComprado);
+                        const reventaPendiente = Math.max(0, totalComprado - totalVendido);
                         
                         document.getElementById('pendingRepurchase').textContent = 
                             `${recompraPendiente.toFixed(2)} USDC`;
+                        document.getElementById('pendingResale').textContent = 
+                            `${reventaPendiente.toFixed(2)} USDC`;
 
                         const gapElement = document.getElementById('currentGap');
                         gapElement.className = 'metric-value';
@@ -2776,12 +3103,28 @@
                         if (recompraPendiente > 0) {
                             repurchaseElement.classList.add('warning');
                         }
+
+                        const resaleElement = document.getElementById('pendingResale');
+                        resaleElement.className = 'metric-value';
+                        if (reventaPendiente > 0) {
+                            resaleElement.classList.add('warning');
+                        }
+                    } else {
+                        // Resetear métricas si no hay operaciones o currentDate no está definido
+                        document.getElementById('currentGap').textContent = '0%';
+                        document.getElementById('activeLots').textContent = '0';
+                        document.getElementById('dailyProfit').innerHTML = '0 VES<br>0 USDC';
+                        document.getElementById('pendingRepurchase').textContent = '0 USDC';
+                        document.getElementById('pendingResale').textContent = '0 USDC';
                     }
                 } catch (error) {
+                    console.error("Error updating AI metrics:", error);
+                    // Fallback en caso de error
                     document.getElementById('currentGap').textContent = '0%';
                     document.getElementById('activeLots').textContent = '0';
                     document.getElementById('dailyProfit').innerHTML = '0 VES<br>0 USDC';
                     document.getElementById('pendingRepurchase').textContent = '0 USDC';
+                    document.getElementById('pendingResale').textContent = '0 USDC';
                 }
             }
 
@@ -2794,68 +3137,76 @@
             saveNotifications() {
                 try {
                     const today = new Date().toISOString().split('T')[0];
+                    // Guardar solo las notificaciones y alertas del día actual
                     const todayNotifications = this.notifications.filter(n => n.date === today);
+                    const todayAlerts = this.alerts.filter(a => a.date === today);
+
                     const dataToSave = {
                         notifications: todayNotifications,
+                        alerts: todayAlerts,
                         processedOperations: Array.from(this.processedOperations),
                         lastLotStates: Array.from(this.lastLotStates.entries())
                     };
-                    window.aiStoredData = dataToSave;
+                    localStorage.setItem(`aiStoredData_${today}`, JSON.stringify(dataToSave));
                 } catch (error) {
-                    console.log('Guardando en memoria...');
+                    console.error('Error saving AI data to localStorage:', error);
                 }
             }
 
             loadNotifications() {
                 try {
-                    const stored = window.aiStoredData;
-                    if (stored) {
-                        const today = new Date().toISOString().split('T')[0];
-                        this.notifications = (stored.notifications || [])
-                            .filter(n => n.date === today)
+                    const today = new Date().toISOString().split('T')[0];
+                    const storedData = localStorage.getItem(`aiStoredData_${today}`);
+                    if (storedData) {
+                        const parsedData = JSON.parse(storedData);
+                        this.notifications = (parsedData.notifications || [])
                             .map(n => ({
                                 ...n,
                                 time: new Date(n.time)
                             }));
-                        this.processedOperations = new Set(stored.processedOperations || []);
-                        this.lastLotStates = new Map(stored.lastLotStates || []);
+                        this.alerts = (parsedData.alerts || [])
+                            .map(a => ({
+                                ...a,
+                                time: new Date(a.time)
+                            }));
+                        this.processedOperations = new Set(parsedData.processedOperations || []);
+                        this.lastLotStates = new Map(parsedData.lastLotStates || []);
                         this.renderNotifications();
                         this.updateBadge();
                     }
                 } catch (error) {
-                    console.log('Inicializando sistema...');
+                    console.error('Error loading AI data from localStorage:', error);
                 }
             }
 
             startMonitoring() {
+                // Ejecutar inmediatamente y luego cada 5 segundos
+                this.analyzeCurrentState();
                 setInterval(() => {
                     this.analyzeCurrentState();
                 }, 5000);
             }
 
-            analyzeCurrentState() {
-                try {
-                    if (typeof operations !== 'undefined' && typeof currentDate !== 'undefined') {
-                        this.analyzeOperations(operations, currentDate);
-                    }
-                } catch (error) {
-                    // Silencioso mientras espera inicialización
-                }
-            }
-
             onOperationAdded(operation) {
-                this.lastOperationCount = Math.max(0, this.lastOperationCount - 1);
+                // Al agregar una operación, es posible que el `lastOperationCount` no se haya actualizado aún
+                // Forzamos una re-evaluación completa para asegurar que la nueva operación sea procesada.
+                this.lastOperationCount = 0; 
                 this.analyzeCurrentState();
             }
 
             onOperationEdited(operation) {
-                const operationPattern = `${operation.fecha}-${operation.usuario}`;
-                const keysToRemove = Array.from(this.processedOperations)
-                    .filter(key => key.includes(operationPattern));
-                keysToRemove.forEach(key => this.processedOperations.delete(key));
+                // Para una operación editada, eliminamos su clave de `processedOperations`
+                // para que sea reprocesada y se genere una nueva notificación si es necesario.
+                const operationKeyPattern = `${operation.fecha}-${operation.usuario}-${operation.operacion}-${operation.montoUsdc}-${operation.tasa}`;
+                // Iterar sobre las claves y eliminar las que coincidan con el patrón de la operación editada
+                Array.from(this.processedOperations).forEach(key => {
+                    if (key.startsWith(operationKeyPattern)) {
+                        this.processedOperations.delete(key);
+                    }
+                });
                 
                 this.addNotification('info', 'Operación Modificada', 
-                    `Se editó la operación de ${operation.usuario}`, {
+                    `Se editó la operación de ${operation.usuario} (Ref: ${operation.referencia || 'N/A'})`, {
                     usuario: operation.usuario,
                     referencia: operation.referencia || 'N/A'
                 });
@@ -2864,20 +3215,24 @@
             }
 
             onOperationsRecalculated() {
+                // Cuando se recalcula todo (ej. por FIFO), limpiamos el estado del IA para un re-análisis completo
                 this.processedOperations.clear();
                 this.lastLotStates.clear();
                 this.lastOperationCount = 0;
                 this.analyzeCurrentState();
+                this.addNotification('info', 'Sistema Recalculado', 'Todas las operaciones han sido re-analizadas.');
             }
 
             resetDaily() {
-                const today = new Date().toISOString().split('T')[0];
-                this.notifications = this.notifications.filter(n => n.date === today);
+                // Limpiar notificaciones y estado para el nuevo día
+                this.notifications = [];
+                this.alerts = [];
                 this.processedOperations.clear();
                 this.lastLotStates.clear();
                 this.lastOperationCount = 0;
                 this.renderNotifications();
                 this.updateBadge();
+                this.addNotification('info', 'Nuevo Día', 'El sistema ha sido reiniciado para el día de hoy.');
             }
         }
 
@@ -2885,27 +3240,33 @@
         function clearNotifications() {
             if (window.aiCenter) {
                 const today = new Date().toISOString().split('T')[0];
+                // Filtrar solo las notificaciones de hoy para limpiar
                 window.aiCenter.notifications = window.aiCenter.notifications.filter(n => n.date !== today);
+                window.aiCenter.alerts = window.aiCenter.alerts.filter(a => a.date !== today);
                 window.aiCenter.renderNotifications();
                 window.aiCenter.updateBadge();
                 
-                if (window.aiStoredData) {
-                    window.aiStoredData.notifications = [];
-                }
+                // También limpiar los datos procesados para el día actual en localStorage
+                localStorage.removeItem(`aiStoredData_${today}`);
+                window.aiCenter.processedOperations.clear();
+                window.aiCenter.lastLotStates.clear();
+                window.aiCenter.lastOperationCount = 0;
             }
         }
 
         function toggleAISettings() {
             if (window.aiCenter) {
-                const config = {
-                    brechaMin: prompt('Brecha mínima (%)', window.aiCenter.alertThresholds.brechaMin),
-                    brechaMax: prompt('Brecha máxima (%)', window.aiCenter.alertThresholds.brechaMax),
-                    muchoLotes: prompt('Alerta muchos lotes', window.aiCenter.alertThresholds.muchoLotes)
-                };
+                const brechaMin = prompt('Brecha mínima (%) para alerta de "Brecha Baja":', window.aiCenter.alertThresholds.brechaMin);
+                const brechaMax = prompt('Brecha máxima (%) para alerta de "Oportunidad: Brecha Alta":', window.aiCenter.alertThresholds.brechaMax);
+                const muchoLotes = prompt('Número de lotes activos para alerta de "Muchos Lotes Activos":', window.aiCenter.alertThresholds.muchoLotes);
+                const recompraCritica = prompt('Umbral de recompra crítica (USDC):', window.aiCenter.alertThresholds.recompraCritica);
+                const reventaCritica = prompt('Umbral de reventa crítica (USDC):', window.aiCenter.alertThresholds.reventaCritica);
                 
-                if (config.brechaMin !== null) window.aiCenter.alertThresholds.brechaMin = parseFloat(config.brechaMin) || 2;
-                if (config.brechaMax !== null) window.aiCenter.alertThresholds.brechaMax = parseFloat(config.brechaMax) || 4;
-                if (config.muchoLotes !== null) window.aiCenter.alertThresholds.muchoLotes = parseInt(config.muchoLotes) || 3;
+                if (brechaMin !== null) window.aiCenter.alertThresholds.brechaMin = parseFloat(brechaMin) || 2;
+                if (brechaMax !== null) window.aiCenter.alertThresholds.brechaMax = parseFloat(brechaMax) || 4;
+                if (muchoLotes !== null) window.aiCenter.alertThresholds.muchoLotes = parseInt(muchoLotes) || 3;
+                if (recompraCritica !== null) window.aiCenter.alertThresholds.recompraCritica = parseFloat(recompraCritica) || 100;
+                if (reventaCritica !== null) window.aiCenter.alertThresholds.reventaCritica = parseFloat(reventaCritica) || 100;
                 
                 window.aiCenter.addNotification('info', 'Configuración Actualizada', 
                     'Los parámetros de alerta han sido modificados');
@@ -2918,13 +3279,15 @@
             
             // Limpiar datos antiguos al inicio de cada día
             const today = new Date().toISOString().split('T')[0];
-            const lastDate = window.aiLastDate || '';
+            const lastDateKey = 'aiLastProcessedDate';
+            const lastProcessedDate = localStorage.getItem(lastDateKey);
             
-            if (lastDate && lastDate !== today) {
+            if (lastProcessedDate && lastProcessedDate !== today) {
                 window.aiCenter.resetDaily();
+                localStorage.setItem(lastDateKey, today); // Actualizar la fecha de último procesamiento
+            } else if (!lastProcessedDate) {
+                localStorage.setItem(lastDateKey, today); // Si no existe, establecerla
             }
-            
-            window.aiLastDate = today;
         });
 
         // Exponer funciones globales para integración
